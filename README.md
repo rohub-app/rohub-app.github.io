@@ -39,7 +39,7 @@ Open the link in Safari, tap **Share**, then **Add to Home Screen**. RoHub opens
 - **The AI idea helper** (Tasks tab, the Ideas tab, and any game you search) uses [Pollinations](https://pollinations.ai), a free AI service that needs no key or account. Only the game's name, its description and what you type are sent. Answers usually take 5 to 30 seconds.
 - **The idea bank on the Ideas tab** is built into the page (`IDEA_BANK` in `site/index.html`), so it works offline. Add your own ideas to that list to grow it.
 - **Robux earned and ad spend aren't public on Roblox**, so you add those yourself per game.
-- **The welcome screen asks where people heard about RoHub.** Each answer adds one to an anonymous tally kept by [Abacus](https://abacus.jasoncameron.dev), a free counting service; no username or other personal data is sent. See the totals in **Settings → Where people found RoHub**, or open the site with `#stats` at the end of the link.
+- **RoHub counts visitors anonymously.** Each browser session adds one visit, and each phone or computer adds one device the first time it opens RoHub. The welcome screen also asks where people heard about RoHub. All of these are anonymous tallies kept by [Abacus](https://abacus.jasoncameron.dev), a free counting service: no username or other personal data is sent, and copies running on localhost don't count. See them in **Settings → RoHub stats**, or open the site with `#stats` at the end of the link.
 - **RoHub used to live at `creatorluisrobiz-dot.github.io/rohub`.** That link still works: it forwards here and brings each device's ideas, tasks and Roblox link along. If you added the old one to your Home Screen, add the new link again.
 - RoHub isn't made by or affiliated with Roblox.
 

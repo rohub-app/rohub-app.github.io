@@ -266,7 +266,7 @@ a.mini { text-decoration: none; display: inline-flex; align-items: center; }
 .row .em { flex: none; width: 34px; font-size: 26px; line-height: 1.1; text-align: center; }
 .row .mini:disabled { color: var(--ok); opacity: 1; cursor: default; }
 .sheet .list .mini { background: var(--bg); }
-.sheet .banner { background: var(--raised); }
+.sheet .banner, .sheet .stat { background: var(--raised); }
 .row .pitch { color: var(--muted); font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
 .mini.push { margin-left: auto; }
 .cta.ai { background: radial-gradient(120% 150% at 0% 0%, color-mix(in srgb, var(--glow1) 30%, transparent), transparent 60%), radial-gradient(120% 150% at 100% 100%, color-mix(in srgb, var(--glow2) 24%, transparent), transparent 60%), var(--surface); }
@@ -1233,7 +1233,7 @@ function openSettings() {
       <div class="list">
         <button type="button" class="row" data-go="account"><div class="body"><div class="t">Roblox account</div><span class="sub">${state.link ? '@' + esc(state.link.username) : 'Not connected'}</span></div><span class="chev">›</span></button>
         <button type="button" class="row" data-go="communities"><div class="body"><div class="t">Your communities</div><span class="sub">${plural((state.link?.communities || []).length, 'community').replace('communitys', 'communities')} added</span></div><span class="chev">›</span></button>
-        <button type="button" class="row" data-go="stats"><div class="body"><div class="t">Where people found RoHub</div><span class="sub">Anonymous answers from the welcome screen</span></div><span class="chev">›</span></button>
+        <button type="button" class="row" data-go="stats"><div class="body"><div class="t">RoHub stats</div><span class="sub">Visits, devices and where people found RoHub</span></div><span class="chev">›</span></button>
       </div>
       ${isInstalled() ? '' : `<div class="sec"><h3>Use it like an app</h3><p class="about">${isIOS() ? 'In Safari, tap Share, then Add to Home Screen.' : 'In your browser’s menu, choose Install app or Add to Home screen.'}</p></div>`}
       <div class="sec"><h3>Your data</h3>
@@ -1354,6 +1354,18 @@ function recordSource(key) {
   persist();
   fetch(`${COUNTER}/hit/${COUNTER_NS}/${key}`).catch(() => {});
 }
+// Anonymous visitor counts: one visit per browser session, and one device the first time a phone or
+// computer opens RoHub. Nothing personal is sent, and copies running on localhost don't count.
+const COUNTING_SINCE = '2026-10-28';
+function countVisit() {
+  if (/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)) return;
+  try {
+    if (!sessionStorage.getItem('rohub-visit')) { sessionStorage.setItem('rohub-visit', '1'); fetch(`${COUNTER}/hit/${COUNTER_NS}/visits`).catch(() => {}); }
+  } catch {}
+  try {
+    if (!localStorage.getItem('rohub-device')) { localStorage.setItem('rohub-device', '1'); fetch(`${COUNTER}/hit/${COUNTER_NS}/devices`).catch(() => {}); }
+  } catch {}
+}
 function finishWelcome() {
   state.welcomeOpen = false; state.welcomeDone = true;
   state.prefs = { ...state.prefs, welcomed: true }; persist();
@@ -1367,18 +1379,22 @@ function finishWelcome() {
 async function openStats() {
   openSheet(`<div class="stack">
       <div class="grabber"></div>
-      <h2>Where people found RoHub</h2>
-      <div id="statsBody"><p class="fine">Counting…</p></div>
+      <h2>RoHub stats</h2>
+      <div class="stack" id="statsBody"><p class="fine">Counting…</p></div>
       <div class="actions"><div class="right"><button type="button" class="btn primary" data-close>Done</button></div></div>
     </div>`);
-  const counts = await Promise.all(SOURCES.map(([k]) => fetch(`${COUNTER}/get/${COUNTER_NS}/${k}`).then(r => (r.ok ? r.json() : {})).then(d => d.value || 0).catch(() => 0)));
+  const get = k => fetch(`${COUNTER}/get/${COUNTER_NS}/${k}`).then(r => (r.ok ? r.json() : {})).then(d => d.value || 0).catch(() => 0);
+  const [visits, devices, ...counts] = await Promise.all([get('visits'), get('devices'), ...SOURCES.map(([k]) => get(k))]);
   const body = $('#statsBody');
   if (!body) return;
   const total = counts.reduce((a, b) => a + b, 0), max = Math.max(1, ...counts);
   const rows = SOURCES.map(([, em, label], i) => ({ em, label, n: counts[i] })).sort((a, b) => b.n - a.n);
-  body.innerHTML = total
-    ? `<div class="bars">${rows.map(r => `<div class="bar-row"><span>${r.em} ${r.label}</span><div class="bar"><span style="width:${(r.n / max * 100).toFixed(1)}%"></span></div><b>${r.n}</b></div>`).join('')}</div><p class="fine">${plural(total, 'answer')} so far. Answers are anonymous.</p>`
-    : '<p class="fine">No answers yet. Share RoHub and check back.</p>';
+  body.innerHTML = statTiles([['Visits', fmt(visits)], ['Devices', fmt(devices)]])
+    + `<p class="fine">Visits counts each time someone opens RoHub. Devices counts each phone or computer once. Counted since ${shortDate(Date.parse(COUNTING_SINCE + 'T12:00:00'))}, with nothing personal sent.</p>`
+    + '<div class="sec"><h3>Where people found RoHub</h3></div>'
+    + (total
+      ? `<div class="bars">${rows.map(r => `<div class="bar-row"><span>${r.em} ${r.label}</span><div class="bar"><span style="width:${(r.n / max * 100).toFixed(1)}%"></span></div><b>${r.n}</b></div>`).join('')}</div><p class="fine">${plural(total, 'answer')} so far. Answers are anonymous.</p>`
+      : '<p class="fine">No answers yet. Share RoHub and check back.</p>');
 }
 
 /* ---------- events ---------- */
@@ -1473,6 +1489,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) { lo
 /* ---------- start ---------- */
 load();
 takeMove();
+countVisit();
 const startTab = location.hash.slice(1);
 if (TABS.some(t => t.id === startTab)) state.tab = startTab;
 render();
