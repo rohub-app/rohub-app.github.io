@@ -1,6 +1,6 @@
 // RoHub's service worker: lets the app open offline and install to the home screen.
 // Network first, so new versions and fresh trending data always win when online.
-const CACHE = 'rohub-v1';
+const CACHE = 'rohub-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

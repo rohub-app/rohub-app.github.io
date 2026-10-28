@@ -182,40 +182,72 @@ textarea { min-height: 90px; resize: vertical; }
 .bul li::before { content: ""; position: absolute; left: 3px; top: .55em; width: 6px; height: 6px; border-radius: 50%; background: var(--fg); }
 .about { color: var(--muted); font-size: 14px; font-weight: 600; white-space: pre-line; margin: 0; overflow-wrap: anywhere; }
 
-.welcome { position: fixed; inset: 0; z-index: 25; background: var(--bg); overflow-y: auto; isolation: isolate; }
+.welcome { position: fixed; inset: 0; z-index: 25; background: var(--bg); overflow-x: hidden; overflow-y: auto; isolation: isolate; }
+.welcome.out { animation: fade-out .35s ease forwards; }
+@keyframes fade-out { to { opacity: 0; transform: scale(1.03); } }
 .welcome-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
-.welcome-bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, transparent 45%, color-mix(in srgb, var(--bg) 55%, transparent) 100%); }
-.aurora { position: absolute; border-radius: 50%; filter: blur(40px); opacity: .9; animation: drift 18s ease-in-out infinite alternate; }
-.aurora.a1 { width: 85vmax; height: 85vmax; top: -38vmax; left: -34vmax; background: radial-gradient(circle, var(--glow1), transparent 64%); }
-.aurora.a2 { width: 80vmax; height: 80vmax; bottom: -36vmax; right: -36vmax; background: radial-gradient(circle, var(--glow2), transparent 64%); animation-duration: 23s; animation-delay: -7s; }
-.aurora.a3 { width: 60vmax; height: 60vmax; top: 34%; left: 12%; background: radial-gradient(circle, var(--glow3), transparent 64%); opacity: .55; animation-duration: 27s; animation-delay: -13s; }
-@keyframes drift { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(7vmax, 5vmax) scale(1.1); } 100% { transform: translate(-5vmax, 9vmax) scale(.94); } }
-.block { position: absolute; bottom: -60px; left: var(--x); width: var(--size); height: var(--size); border-radius: 26%; border: 1.5px solid color-mix(in srgb, var(--fg) 16%, transparent); background: color-mix(in srgb, var(--fg) 4%, transparent); animation: float var(--dur) linear var(--delay) infinite; }
-@keyframes float { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translateY(-115vh) rotate(var(--rot)); opacity: 0; } }
-.welcome-in { position: relative; box-sizing: border-box; max-width: 480px; margin: 0 auto; padding: calc(env(safe-area-inset-top, 0px) + 44px) max(20px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 28px) max(20px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 14px; }
-.logo { position: relative; width: 68px; height: 68px; border-radius: 20px; background: var(--fg); color: var(--bg); display: grid; place-items: center; box-shadow: 0 0 44px color-mix(in srgb, var(--glow1) 70%, transparent); animation: bob 5s ease-in-out infinite; }
-.logo::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; border: 2px solid color-mix(in srgb, var(--fg) 55%, transparent); animation: ring 2.8s ease-out infinite; }
-@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
-@keyframes ring { from { transform: scale(1); opacity: .9; } to { transform: scale(1.65); opacity: 0; } }
-.welcome h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin: 12px 0 0; }
+.orb { position: absolute; left: 50%; top: 36%; width: 130vmin; height: 130vmin; margin: -65vmin 0 0 -65vmin; border-radius: 50%; filter: blur(48px); opacity: .55;
+  background: radial-gradient(circle at 38% 40%, color-mix(in srgb, var(--glow1) 75%, transparent), transparent 55%), radial-gradient(circle at 64% 62%, color-mix(in srgb, var(--glow2) 65%, transparent), transparent 55%);
+  animation: breathe 9s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { transform: scale(.92) rotate(0deg); opacity: .45; } 50% { transform: scale(1.08) rotate(30deg); opacity: .7; } }
+.dot { position: absolute; left: var(--x); top: var(--y); width: var(--s); height: var(--s); border-radius: 50%; background: var(--fg); opacity: 0; animation: twinkle var(--d) ease-in-out var(--delay) infinite; }
+@keyframes twinkle { 0%, 100% { opacity: 0; transform: translateY(0); } 50% { opacity: var(--o); transform: translateY(-16px); } }
+.welcome-in { box-sizing: border-box; min-height: 100%; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; padding: calc(env(safe-area-inset-top, 0px) + 28px) max(24px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 22px) max(24px, env(safe-area-inset-left, 0px)); }
+.w-hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 12px; }
+.w-logo { width: 116px; height: 116px; border-radius: 30px; filter: drop-shadow(0 18px 44px color-mix(in srgb, var(--glow1) 60%, transparent)); animation: hover 6s ease-in-out infinite; }
+@keyframes hover { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-9px) rotate(2deg); } }
+.w-title { margin: 4px 0 0; font-size: 46px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.w-q { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; max-width: 14ch; }
 @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-  .welcome h2 { background: linear-gradient(100deg, var(--fg) 35%, var(--glow-text) 50%, var(--fg) 65%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shine 5s ease-in-out infinite; }
+  .w-title, .w-q { background: linear-gradient(100deg, var(--fg) 35%, var(--glow-text) 50%, var(--fg) 65%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shine 5s ease-in-out infinite; }
 }
 @keyframes shine { from { background-position: 120% 0; } to { background-position: -120% 0; } }
-.lead { color: var(--muted); font-size: 16px; font-weight: 600; margin: 0 0 6px; }
-.step { background: color-mix(in srgb, var(--surface) 72%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid color-mix(in srgb, var(--fg) 9%, transparent); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-.step-row { display: flex; align-items: center; gap: 12px; }
-.badge { width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 13px; font-weight: 800; color: var(--muted); border: 2px solid var(--faint); box-sizing: border-box; }
-.badge.done { border: 0; background: var(--ok) var(--check) center / 14px 14px no-repeat; }
+.w-tag { margin: 0; color: var(--muted); font-size: 17px; font-weight: 600; max-width: 28ch; }
+.w-panel { display: flex; flex-direction: column; gap: 12px; }
+.w-field { display: flex; align-items: center; gap: 6px; padding: 6px 6px 6px 20px; border-radius: 999px; background: color-mix(in srgb, var(--raised) 82%, transparent); border: 1px solid var(--line); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); transition: border-color .2s, box-shadow .2s; }
+.w-field:focus-within { border-color: color-mix(in srgb, var(--glow-text) 65%, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--glow1) 25%, transparent), 0 0 36px color-mix(in srgb, var(--glow1) 40%, transparent); }
+.w-field input { flex: 1; background: none; border: 0; border-radius: 0; padding: 12px 0; }
+.w-field input:focus { outline: none; }
+.w-go { flex: none; width: 50px; height: 50px; border-radius: 50%; border: 0; padding: 0; background: var(--fg); color: var(--bg); display: grid; place-items: center; cursor: pointer; transition: transform .15s; }
+.w-go:active { transform: scale(.9); }
+.w-fine { text-align: center; }
+.w-step { animation: step-in .5s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes step-in { from { transform: translateY(22px); } }
+.sources { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.source { appearance: none; margin: 0; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 80%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); color: var(--fg); font: 700 15px var(--font); border-radius: 18px; padding: 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; text-align: left; transition: transform .15s, border-color .15s, background-color .15s; }
+.source:active { transform: scale(.96); }
+.source.on { border-color: var(--fg); background: var(--raised); }
+.source .em { font-size: 20px; line-height: 1; }
 .connect { display: flex; gap: 8px; }
 .connect input { flex: 1; }
 .linkbtn { appearance: none; background: none; border: 0; color: var(--muted); font: 700 15px var(--font); padding: 12px; cursor: pointer; align-self: center; }
-.welcome .btn.primary { box-shadow: 0 0 26px color-mix(in srgb, var(--glow-text) 45%, transparent); }
-.reveal { animation: rise-in .7s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 90ms); }
-@keyframes rise-in { from { transform: translateY(26px) scale(.97); } }
 .spark { position: fixed; z-index: 40; width: 8px; height: 8px; border-radius: 2px; pointer-events: none; animation: spark 1.1s cubic-bezier(.15, .7, .3, 1) forwards; }
 @keyframes spark { from { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; } to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(260deg); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .aurora, .logo, .logo::after, .welcome h2, .reveal { animation: none !important; } .block { display: none; } }
+
+.hero { position: relative; overflow: hidden; border-radius: 24px; padding: 18px; display: flex; flex-direction: column; gap: 16px;
+  background: radial-gradient(130% 120% at 0% 0%, color-mix(in srgb, var(--glow1) 30%, transparent), transparent 55%), radial-gradient(120% 120% at 100% 100%, color-mix(in srgb, var(--glow2) 22%, transparent), transparent 55%), var(--surface); }
+.hero-top { display: flex; align-items: center; gap: 14px; }
+.hero .txt b { font-size: 22px; letter-spacing: -0.01em; }
+.ring { flex: none; width: 76px; height: 76px; border-radius: 50%; padding: 3px; box-sizing: border-box; background: conic-gradient(var(--glow1), var(--glow2), var(--glow3), var(--glow1)); animation: spin 8s linear infinite; }
+.ring > * { display: block; width: 100%; height: 100%; box-sizing: border-box; border-radius: 50%; border: 3px solid var(--surface); object-fit: cover; background: var(--raised); animation: spin 8s linear infinite reverse; }
+.ring > .ph { font-size: 26px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.hero-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.hero-stats div { display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 10px 4px; border-radius: 14px; background: color-mix(in srgb, var(--bg) 40%, transparent); min-width: 0; }
+.hero-stats b { font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.hero-stats span { font-size: 11px; font-weight: 700; color: var(--muted); }
+.hero-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+a.mini { text-decoration: none; display: inline-flex; align-items: center; }
+.iconbtn.spinning svg { animation: spin 1s linear infinite; }
+.fab.ghost { visibility: hidden; }
+
+.bars { display: flex; flex-direction: column; gap: 10px; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 9.5em) minmax(0, 1fr) 2.5em; gap: 10px; align-items: center; font-size: 14px; font-weight: 700; }
+.bar { height: 10px; border-radius: 5px; background: var(--raised); overflow: hidden; }
+.bar span { display: block; height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--glow1), var(--glow-text)); }
+.bar-row b { text-align: right; font-variant-numeric: tabular-nums; }
+
+@media (prefers-reduced-motion: reduce) { .orb, .w-logo, .w-title, .w-q, .w-step, .ring, .ring > *, .welcome.out { animation: none !important; } .dot { display: none; } }
 
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); background: var(--raised); color: var(--fg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 700; z-index: 30; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0, 0, 0, .6); }
 </style>
@@ -244,7 +276,7 @@ textarea { min-height: 90px; resize: vertical; }
 const ICONS = {
   ideas: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2h5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z"/>',
   tasks: '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/>',
-  games: '<rect x="2.5" y="7" width="19" height="11" rx="5.5"/><path d="M7.5 10.5v4M5.5 12.5h4"/><circle cx="15.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="17.5" cy="13.8" r="1" fill="currentColor" stroke="none"/>',
+  games: '<path d="M7 7h10a5 5 0 0 1 4.9 4l.6 3.6A2.9 2.9 0 0 1 17.5 17l-1.6-1.6a2 2 0 0 0-1.4-.6h-5a2 2 0 0 0-1.4.6L6.5 17a2.9 2.9 0 0 1-5-2.4l.6-3.6A5 5 0 0 1 7 7z"/><path d="M7 10v3M5.5 11.5h3"/><circle cx="15.5" cy="10.5" r="1" fill="currentColor" stroke="none"/><circle cx="17.5" cy="12.5" r="1" fill="currentColor" stroke="none"/>',
   trending: '<path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
 };
 const icon = (paths, size = 22) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
@@ -294,6 +326,11 @@ const PLAYER_TTL = 10 * 60 * 1000;
 const USERNAME_RE = /^[A-Za-z0-9_]{3,20}$/;
 const STAFF_RE = /\b(?:owner|co-owner|admin|administrator|dev|developer|builder|scripter|modeler|designer|staff|creator|manager|founder)s?\b/i;
 const FAN_RE = /\bfans?\b/i;
+const SOURCES = [['tiktok', '🎵', 'TikTok'], ['youtube', '▶️', 'YouTube'], ['friend', '👥', 'A friend'], ['instagram', '📸', 'Instagram'], ['discord', '💬', 'Discord'],
+  ['snapchat', '👻', 'Snapchat'], ['roblox', '🎮', 'Roblox'], ['twitter', '𝕏', 'X / Twitter'], ['google', '🔍', 'Google'], ['other', '✨', 'Somewhere else']];
+// Anonymous answer tallies kept by Abacus, a free counting service (no account, no personal data).
+const COUNTER = 'https://abacus.jasoncameron.dev';
+const COUNTER_NS = 'rohub-creatorluisrobiz';
 
 const state = { tab: 'ideas', items: [], link: null, player: null, playerAt: 0, prefs: {}, trending: null, trendingError: false, loadingPlayer: false, playerError: false, welcomeOpen: false, welcomeDone: false };
 
@@ -617,13 +654,26 @@ function renderGames() {
     const p = state.player, linked = p.games || [];
     const mine = [...linked.map(extrasFor).filter(Boolean), ...manual];
     const sum = k => mine.reduce((acc, g) => acc + num(g[k]), 0);
-    html += `<div class="profile">
-      ${art(p.avatar, p.displayName || p.username, 'avatar')}
-      <div class="txt"><b>${esc(p.displayName || p.robloxName || p.username)}</b><span>@${esc(p.robloxName || p.username)} · ${state.loadingPlayer ? 'updating…' : 'updated ' + ago(new Date(state.playerAt || p.syncedAt).toISOString())}</span></div>
-      <button class="mini" data-act="refresh" ${state.loadingPlayer ? 'disabled' : ''}>Refresh</button>
+    const commCount = (p.communities || []).filter(c => c.id).length;
+    html += `<div class="hero">
+      <div class="hero-top">
+        <div class="ring">${art(p.avatar, p.displayName || p.username, 'hero-av')}</div>
+        <div class="txt"><b>${esc(p.displayName || p.robloxName || p.username)}</b><span>@${esc(p.robloxName || p.username)}</span></div>
+        <button class="iconbtn ${state.loadingPlayer ? 'spinning' : ''}" data-act="refresh" aria-label="Refresh from Roblox" ${state.loadingPlayer ? 'disabled' : ''}>${icon('<path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 4v5h-5"/>', 18)}</button>
+      </div>
+      <div class="hero-stats">
+        <div><b>${fmt(p.totals?.games)}</b><span>Games</span></div>
+        <div><b>${fmt(p.totals?.visits)}</b><span>Visits</span></div>
+        <div><b>${fmt(p.totals?.favorites)}</b><span>Favorites</span></div>
+        <div><b>${fmt(p.totals?.playing)}</b><span>Playing</span></div>
+      </div>
+      <div class="hero-foot">
+        <span class="fine">${state.loadingPlayer ? 'Updating…' : 'Updated ' + ago(new Date(state.playerAt || p.syncedAt).toISOString())}${commCount ? ' · ' + (commCount === 1 ? '1 community' : commCount + ' communities') : ''}</span>
+        ${p.robloxUserId ? `<a class="mini" href="https://www.roblox.com/users/${p.robloxUserId}/profile" target="_blank" rel="noopener">Roblox profile ↗</a>` : ''}
+      </div>
     </div>`;
     if (state.playerError) html += '<div class="banner">Couldn’t refresh from Roblox just now, so these numbers may be a little old.</div>';
-    html += statTiles([['Playing now', fmt(p.totals?.playing)], ['Total visits', fmt(p.totals?.visits)], ['Ad credits spent', fmt(sum('adCredits'))], ['Robux earned', fmt(sum('robux'))]]);
+    html += statTiles([['Ad credits spent', fmt(sum('adCredits'))], ['Robux earned', fmt(sum('robux'))]]);
     const onProfile = linked.filter(g => g.source !== 'community');
     const comms = (p.communities || []).filter(c => c.id);
     if (onProfile.length) html += `<div class="group-h">On your profile</div><div class="grid">${onProfile.map(ownTile).join('')}</div>`;
@@ -666,7 +716,7 @@ function render() {
   $('#subtitle').textContent = subtitle();
   renderTabs();
   $('#main').innerHTML = { ideas: renderIdeas, tasks: renderTasks, games: renderGames, trending: renderTrending }[state.tab]();
-  $('#fab').hidden = state.tab === 'trending';
+  $('#fab').classList.toggle('ghost', state.tab === 'trending');
   maybeWelcome();
 }
 
@@ -873,6 +923,7 @@ function openSettings() {
       <div class="list">
         <button type="button" class="row" data-go="account"><div class="body"><div class="t">Roblox account</div><span class="sub">${state.link ? '@' + esc(state.link.username) : 'Not connected'}</span></div><span class="chev">›</span></button>
         <button type="button" class="row" data-go="communities"><div class="body"><div class="t">Your communities</div><span class="sub">${plural((state.link?.communities || []).length, 'community').replace('communitys', 'communities')} added</span></div><span class="chev">›</span></button>
+        <button type="button" class="row" data-go="stats"><div class="body"><div class="t">Where people found RoHub</div><span class="sub">Anonymous answers from the welcome screen</span></div><span class="chev">›</span></button>
       </div>
       ${isInstalled() ? '' : `<div class="sec"><h3>Use it like an app</h3><p class="about">${isIOS() ? 'In Safari, tap Share, then Add to Home Screen.' : 'In your browser’s menu, choose Install app or Add to Home screen.'}</p></div>`}
       <div class="sec"><h3>Your data</h3>
@@ -883,7 +934,7 @@ function openSettings() {
       <div class="sec"><h3>About RoHub</h3><p class="fine">Trending updates every 30 minutes from Roblox’s charts. Your games load live from Roblox through RoProxy. RoHub isn’t made by or affiliated with Roblox.</p></div>
       <div class="actions"><button type="button" class="btn danger" id="resetBtn">Erase RoHub data</button><div class="right"><button type="button" class="btn primary" data-close>Done</button></div></div>
     </div>`, sheet => {
-    sheet.querySelectorAll('[data-go]').forEach(b => { b.onclick = () => (b.dataset.go === 'account' ? openAccount() : openCommunities()); });
+    sheet.querySelectorAll('[data-go]').forEach(b => { b.onclick = () => ({ account: openAccount, communities: openCommunities, stats: openStats })[b.dataset.go](); });
     $('#backupBtn').onclick = () => {
       const blob = new Blob([JSON.stringify({ app: 'RoHub', version: 1, exportedAt: Date.now(), items: state.items, link: state.link, prefs: state.prefs }, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
@@ -926,46 +977,98 @@ function burst(el) {
     setTimeout(() => s.remove(), 1200);
   }
 }
+const rand = (a, b) => a + Math.random() * (b - a);
 function maybeWelcome() {
-  if (!state.prefs.welcomed && !state.link && !state.welcomeDone && !state.welcomeOpen) openWelcome();
+  if (state.welcomeOpen || state.welcomeDone) return;
+  if (!state.prefs.welcomed && !state.link) openWelcome(welcomeStart);
+  else if (!state.prefs.sourceAsked) openWelcome(welcomeSource);
 }
-function openWelcome() {
+function openWelcome(step) {
   state.welcomeOpen = true;
-  const close = () => {
-    state.welcomeOpen = false; state.welcomeDone = true;
-    state.prefs = { ...state.prefs, welcomed: true }; persist();
-    $('#welcomeRoot').innerHTML = '';
-  };
-  // Floating blocks start mid-flight (negative delays) so the background is already alive on the first frame.
-  const blocks = Array.from({ length: 14 }, () => `<span class="block" style="--x:${(Math.random() * 100).toFixed(1)}%;--size:${Math.round(14 + Math.random() * 34)}px;--dur:${Math.round(14 + Math.random() * 16)}s;--delay:-${(Math.random() * 30).toFixed(1)}s;--rot:${Math.round(Math.random() * 360 - 180)}deg"></span>`).join('');
-  const installTip = isIOS() && !isInstalled() ? `<div class="step reveal" style="--i:4"><div class="step-row"><span class="badge">★</span><div class="txt"><b>Use it like an app</b><span>In Safari, tap Share, then Add to Home Screen.</span></div></div></div>` : '';
+  // Dots start mid-twinkle (negative delays) so the background is already alive on the first frame.
+  const dots = Array.from({ length: 24 }, () => `<span class="dot" style="--x:${rand(2, 98).toFixed(1)}%;--y:${rand(4, 96).toFixed(1)}%;--s:${rand(1.5, 3.5).toFixed(1)}px;--o:${rand(.25, .75).toFixed(2)};--d:${rand(4, 9).toFixed(1)}s;--delay:-${rand(0, 9).toFixed(1)}s"></span>`).join('');
   $('#welcomeRoot').innerHTML = `<div class="welcome" role="dialog" aria-modal="true" aria-labelledby="wTitle">
-    <div class="welcome-bg" aria-hidden="true"><div class="aurora a1"></div><div class="aurora a2"></div><div class="aurora a3"></div>${blocks}</div>
-    <div class="welcome-in">
-      <div class="reveal" style="--i:0"><div class="logo">${icon('<path d="M4 9.5 12 4l8 5.5v9L12 20l-8-1.5z"/><path d="M12 4v16M4 9.5l8 2 8-2"/>', 34)}</div></div>
-      <div class="reveal" style="--i:1"><h2 id="wTitle">Welcome to RoHub</h2></div>
-      <p class="lead reveal" style="--i:2">Your Roblox ideas, tasks, games and what’s trending, all in one place. No account needed.</p>
-      <div class="step reveal" style="--i:3" id="wStep">
-        <div class="step-row"><span class="badge">1</span><div class="txt"><b>Connect your Roblox account</b><span>See all your games with icons, players and visits. You can add your communities later.</span></div></div>
-        <form class="connect" id="wForm" novalidate>
-          <input id="wUser" placeholder="Roblox username" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Roblox username">
-          <button class="btn primary" type="submit">Connect</button>
-        </form>
-        <p class="fine">RoHub only reads your public Roblox profile. It never asks for your Roblox password.</p>
+    <div class="welcome-bg" aria-hidden="true"><div class="orb"></div>${dots}</div>
+    <div class="welcome-in" id="wIn"></div>
+  </div>`;
+  step();
+}
+function welcomeStart() {
+  $('#wIn').innerHTML = `
+    <div class="w-hero w-step">
+      <img class="w-logo" src="icons/icon-512.png" alt="" width="116" height="116">
+      <h2 class="w-title" id="wTitle">RoHub</h2>
+      <p class="w-tag">Your Roblox ideas, tasks, games and what’s trending.</p>
+    </div>
+    <form class="w-panel w-step" id="wForm" novalidate style="animation-delay:.1s">
+      <div class="w-field">
+        <input id="wUser" placeholder="Your Roblox username" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" aria-label="Roblox username">
+        <button class="w-go" type="submit" aria-label="Continue">${icon('<path d="M5 12h14M13 6l6 6-6 6"/>', 22)}</button>
       </div>
-      ${installTip}
-      <button class="linkbtn reveal" style="--i:5" id="wSkip">Skip for now</button>
-    </div></div>`;
+      <p class="fine w-fine">RoHub only reads your public Roblox profile. No password, no account.</p>
+      <button type="button" class="linkbtn" id="wSkip">Skip for now</button>
+    </form>`;
   $('#wForm').onsubmit = e => {
     e.preventDefault();
-    const name = connect($('#wUser').value);
-    if (!name) return;
-    $('#wStep').innerHTML = `<div class="step-row"><span class="badge done" aria-label="Done"></span><div class="txt"><b>Connected as @${esc(name)}</b><span>Your games are loading in My games.</span></div></div>`;
-    $('#wSkip').outerHTML = '<button class="btn primary" id="wGo">Start using RoHub</button>';
-    $('#wGo').onclick = () => { close(); state.tab = 'games'; render(); };
-    burst($('#wStep'));
+    if (!connect($('#wUser').value)) return;
+    burst($('.w-go'));
+    setTimeout(welcomeSource, 450);
   };
-  $('#wSkip').onclick = close;
+  $('#wSkip').onclick = welcomeSource;
+}
+function welcomeSource() {
+  if (state.prefs.sourceAsked) { finishWelcome(); return; }
+  $('#wIn').innerHTML = `
+    <div class="w-hero w-step">
+      ${state.link ? `<p class="w-tag">Nice to meet you, @${esc(state.link.username)} 👋</p>` : ''}
+      <h2 class="w-q" id="wTitle">Where did you hear about RoHub?</h2>
+    </div>
+    <div class="w-panel w-step" style="animation-delay:.1s">
+      <div class="sources">${SOURCES.map(([k, em, label]) => `<button type="button" class="source" data-src="${k}"><span class="em" aria-hidden="true">${em}</span>${label}</button>`).join('')}</div>
+      <button type="button" class="linkbtn" id="wSkip">Skip</button>
+    </div>`;
+  document.querySelectorAll('[data-src]').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('[data-src]').forEach(x => { x.disabled = true; });
+      b.classList.add('on');
+      recordSource(b.dataset.src);
+      burst(b);
+      setTimeout(finishWelcome, 650);
+    };
+  });
+  $('#wSkip').onclick = () => { state.prefs = { ...state.prefs, sourceAsked: true }; persist(); finishWelcome(); };
+}
+// Adds one to an anonymous public tally; nothing else (no username) is sent.
+function recordSource(key) {
+  state.prefs = { ...state.prefs, sourceAsked: true, source: key };
+  persist();
+  fetch(`${COUNTER}/hit/${COUNTER_NS}/${key}`).catch(() => {});
+}
+function finishWelcome() {
+  state.welcomeOpen = false; state.welcomeDone = true;
+  state.prefs = { ...state.prefs, welcomed: true }; persist();
+  if (state.link && state.tab === 'ideas') state.tab = 'games';
+  render();
+  const w = $('.welcome');
+  if (!w || matchMedia('(prefers-reduced-motion: reduce)').matches) { $('#welcomeRoot').innerHTML = ''; return; }
+  w.classList.add('out');
+  setTimeout(() => { $('#welcomeRoot').innerHTML = ''; }, 360);
+}
+async function openStats() {
+  openSheet(`<div class="stack">
+      <div class="grabber"></div>
+      <h2>Where people found RoHub</h2>
+      <div id="statsBody"><p class="fine">Counting…</p></div>
+      <div class="actions"><div class="right"><button type="button" class="btn primary" data-close>Done</button></div></div>
+    </div>`);
+  const counts = await Promise.all(SOURCES.map(([k]) => fetch(`${COUNTER}/get/${COUNTER_NS}/${k}`).then(r => (r.ok ? r.json() : {})).then(d => d.value || 0).catch(() => 0)));
+  const body = $('#statsBody');
+  if (!body) return;
+  const total = counts.reduce((a, b) => a + b, 0), max = Math.max(1, ...counts);
+  const rows = SOURCES.map(([, em, label], i) => ({ em, label, n: counts[i] })).sort((a, b) => b.n - a.n);
+  body.innerHTML = total
+    ? `<div class="bars">${rows.map(r => `<div class="bar-row"><span>${r.em} ${r.label}</span><div class="bar"><span style="width:${(r.n / max * 100).toFixed(1)}%"></span></div><b>${r.n}</b></div>`).join('')}</div><p class="fine">${plural(total, 'answer')} so far. Answers are anonymous.</p>`
+    : '<p class="fine">No answers yet. Share RoHub and check back.</p>';
 }
 
 /* ---------- events ---------- */
@@ -1016,6 +1119,8 @@ load();
 const startTab = location.hash.slice(1);
 if (TABS.some(t => t.id === startTab)) state.tab = startTab;
 render();
+if (startTab === 'stats') openStats();
+window.addEventListener('hashchange', () => { if (location.hash === '#stats') openStats(); });
 loadTrending();
 refreshPlayer(false);
 setInterval(() => { loadTrending(); refreshPlayer(false); }, 15 * 60 * 1000);

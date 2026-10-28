@@ -31,4 +31,5 @@ Open the link in Safari, tap **Share**, then **Add to Home Screen**. RoHub opens
 - **Your games load live from Roblox** through [RoProxy](https://roproxy.com), a public proxy that lets websites read Roblox's public data. If RoProxy is down, RoHub shows your last saved numbers. Like ratios aren't available this way, so they only show on the Trending tab.
 - **Trending notes are written from Roblox's data**, such as recent updates, seasonal events, player changes and chart positions. No AI key is needed.
 - **Robux earned and ad spend aren't public on Roblox**, so you add those yourself per game.
+- **The welcome screen asks where people heard about RoHub.** Each answer adds one to an anonymous tally kept by [Abacus](https://abacus.jasoncameron.dev), a free counting service; no username or other personal data is sent. See the totals in **Settings → Where people found RoHub**, or open the site with `#stats` at the end of the link.
 - RoHub isn't made by or affiliated with Roblox.
