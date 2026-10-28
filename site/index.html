@@ -400,6 +400,20 @@ function persist() {
     return false;
   }
 }
+// RoHub's old link (creatorluisrobiz-dot.github.io/rohub) forwards here with that device's ideas, tasks and
+// Roblox link in "#move=". Browsers never send that part of a link to a server, and it's cleared right away.
+function takeMove() {
+  if (!location.hash.startsWith('#move=')) return;
+  let data = null;
+  try { data = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(location.hash.slice(6).replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)))); } catch {}
+  history.replaceState(null, '', location.pathname + location.search);
+  if (!data || data.app !== 'RoHub' || !Array.isArray(data.items)) return;
+  const have = new Set(state.items.map(x => x.id));
+  state.items = state.items.concat(data.items.filter(x => x && x.id && !have.has(x.id)));
+  if (!state.link && data.link && data.link.username) state.link = data.link;
+  state.prefs = { ...(data.prefs || {}), ...state.prefs };
+  if (persist()) toast('Your RoHub data moved over to the new link');
+}
 function saveItem(item) {
   const { id, ...body } = item;
   if (id) { const i = state.items.findIndex(x => x.id === id); if (i >= 0) state.items[i] = { id, ...body }; else state.items.push({ id, ...body }); }
@@ -1116,6 +1130,7 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) { lo
 
 /* ---------- start ---------- */
 load();
+takeMove();
 const startTab = location.hash.slice(1);
 if (TABS.some(t => t.id === startTab)) state.tab = startTab;
 render();

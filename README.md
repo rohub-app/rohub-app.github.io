@@ -2,6 +2,8 @@
 
 Your Roblox ideas, tasks, games and what's trending, all in one place. Works on any phone or computer, with no account needed.
 
+**Open it:** https://rohub-app.github.io
+
 ## What's in here
 
 | Path | What it does |
@@ -10,6 +12,7 @@ Your Roblox ideas, tasks, games and what's trending, all in one place. Works on 
 | `scripts/build_trending.py` | Builds the Trending tab from Roblox's charts |
 | `.github/workflows/sync.yml` | Runs that every 30 minutes on GitHub and publishes the site |
 | `scripts/make_icons.py` | Draws the app icons |
+| `promo/` | Makes RoHub's TikTok videos: voiceover, original music, sound effects and app screens |
 
 ## Put it online (free, about 5 minutes)
 
@@ -18,6 +21,8 @@ Your Roblox ideas, tasks, games and what's trending, all in one place. Works on 
 3. **Upload these files.** On the new repository's page, click **uploading an existing file** and drag in everything inside this folder, including the hidden `.github` folder (in Finder, press **Cmd + Shift + .** to show it). Then click **Commit changes**.
 4. **Turn on the website.** Go to **Settings → Pages**. Under **Build and deployment**, set **Source** to **GitHub Actions**.
 5. **Run the first sync.** Go to **Actions → RoHub sync → Run workflow**. After about a minute, RoHub is live at `https://YOUR-USERNAME.github.io/rohub/`.
+
+For a shorter link like `https://rohub-app.github.io`, create a free GitHub organization and name the repository `ORGANIZATION-NAME.github.io`.
 
 From then on, GitHub refreshes the Trending tab every 30 minutes by itself. Your computer can be off.
 
@@ -32,4 +37,18 @@ Open the link in Safari, tap **Share**, then **Add to Home Screen**. RoHub opens
 - **Trending notes are written from Roblox's data**, such as recent updates, seasonal events, player changes and chart positions. No AI key is needed.
 - **Robux earned and ad spend aren't public on Roblox**, so you add those yourself per game.
 - **The welcome screen asks where people heard about RoHub.** Each answer adds one to an anonymous tally kept by [Abacus](https://abacus.jasoncameron.dev), a free counting service; no username or other personal data is sent. See the totals in **Settings → Where people found RoHub**, or open the site with `#stats` at the end of the link.
+- **RoHub used to live at `creatorluisrobiz-dot.github.io/rohub`.** That link still works: it forwards here and brings each device's ideas, tasks and Roblox link along. If you added the old one to your Home Screen, add the new link again.
 - RoHub isn't made by or affiliated with Roblox.
+
+## Make the TikTok videos
+
+On a Mac, with nothing extra to install (it uses the Mac's built-in voice):
+
+```bash
+cd promo
+python3 make_audio.py                     # voiceover, music, sound effects and timeline
+swiftc -O render.swift -o build/render    # first time only
+./build/render build/rohub-tiktok-1-intro.json
+```
+
+The finished `.mp4` lands in `promo/`. Change what's said and shown in `VIDEOS` at the top of `make_audio.py`, and swap the app screenshots in `promo/shots/`.
