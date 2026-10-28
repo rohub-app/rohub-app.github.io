@@ -1,0 +1,53 @@
+name: RoHub sync
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"   # every 30 minutes (GitHub sometimes starts it a few minutes late)
+  workflow_dispatch:          # adds a "Run workflow" button on the Actions tab
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: rohub-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build trending data
+        env:
+          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+        run: python3 scripts/build_trending.py site/data/trending.json
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+      # GitHub pauses scheduled jobs in repositories without commits for 60 days.
+      # A tiny commit once a day keeps the 30-minute sync running.
+      - name: Keep the schedule active
+        if: github.event_name == 'schedule'
+        run: |
+          if [ "$(date -u +%H)" = "06" ] && [ "$(date -u +%M)" -lt 30 ]; then
+            date -u +"%Y-%m-%dT%H:%MZ" > .github/last-sync
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .github/last-sync
+            git commit -m "Keep RoHub's sync schedule active" && git push
+          fi

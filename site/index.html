@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>RoHub</title>
+<meta name="description" content="Track your Roblox game ideas, tasks and games, and see what's trending on Roblox.">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RoHub">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: one narrow column, large page title, rounded cards and icon grids, floating tab bubble + add button at the bottom. Deliberately single dark theme. */
+:root {
+  color-scheme: dark;
+  --bg: #000000;
+  --surface: #121214;
+  --raised: #1e1e21;
+  --line: #2a2a2e;
+  --fg: #f5f5f7;
+  --muted: #9b9ba3;
+  --faint: #606068;
+  --ok: #6bd49a;
+  --warn: #f0b955;
+  --bad: #ff6b6b;
+  --scrim: rgba(0, 0, 0, .72);
+  --glow1: #4263eb;
+  --glow2: #9c36b5;
+  --glow3: #0ca678;
+  --glow-text: #b4c0ff;
+  --pink: #ff8fab;
+  --font: "Nunito", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r: 18px;
+  --check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 12.5l4.2 4.2L18.5 8'/%3E%3C/svg%3E");
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { -webkit-tap-highlight-color: transparent; }
+html, body { background: var(--bg); color: var(--fg); }
+body { margin: 0; font-family: var(--font); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 640px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 112px; }
+:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+header { padding-block: 14px 4px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.app { font-size: 15px; font-weight: 800; color: var(--fg); letter-spacing: -0.01em; }
+.iconbtn { appearance: none; border: 0; background: var(--raised); color: var(--muted); width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; padding: 0; }
+h1 { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin: 8px 0 0; }
+.subtitle { color: var(--muted); font-size: 15px; font-weight: 600; margin: 4px 0 0; min-height: 21px; }
+
+main { padding-top: 16px; display: flex; flex-direction: column; gap: 12px; }
+.banner { background: var(--surface); border-radius: var(--r); padding: 12px 16px; color: var(--muted); font-size: 14px; font-weight: 600; }
+.banner b { color: var(--fg); }
+.banner.good { color: var(--ok); }
+.group-h { font-size: 13px; font-weight: 800; color: var(--muted); padding: 8px 4px 0; }
+
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--surface); border-radius: var(--r); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.stat span { font-size: 13px; font-weight: 700; color: var(--muted); }
+.stat b { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+@media (min-width: 560px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.list { background: var(--surface); border-radius: var(--r); overflow: hidden; }
+.row { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; }
+.row + .row { border-top: 1px solid var(--line); }
+button.row { appearance: none; border: 0; width: 100%; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; align-items: center; }
+.row[data-edit] { cursor: pointer; }
+.row[data-edit]:active, button.row:active { background: var(--raised); }
+@media (hover: hover) { .row[data-edit]:hover, button.row:hover, .tile:hover { background: var(--raised); } }
+.row .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.row .t { font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
+.sub { color: var(--muted); font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.chev { color: var(--faint); font-size: 22px; line-height: 1; }
+.row .notes { color: var(--muted); font-size: 14px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.chip { font-size: 12px; font-weight: 700; color: var(--muted); background: var(--raised); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+.chip.ok { color: var(--ok); background: color-mix(in srgb, var(--ok) 15%, transparent); }
+.chip.warn { color: var(--warn); background: color-mix(in srgb, var(--warn) 15%, transparent); }
+.chip.bad { color: var(--bad); background: color-mix(in srgb, var(--bad) 15%, transparent); }
+.chip.hot { color: var(--bg); background: var(--fg); }
+.chip.pick { appearance: none; border: 0; margin: 0; font: 700 13px var(--font); color: var(--fg); padding: 7px 12px; cursor: pointer; white-space: normal; text-align: left; }
+
+.check { appearance: none; -webkit-appearance: none; flex: none; width: 24px; height: 24px; margin: 0; border: 2px solid var(--faint); border-radius: 50%; cursor: pointer; background: none; }
+.check:checked { border-color: var(--ok); background: var(--ok) var(--check) center / 14px 14px no-repeat; }
+.row.done .t { color: var(--faint); text-decoration: line-through; }
+
+.nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 4px; }
+.nums div { display: flex; flex-direction: column; min-width: 0; }
+.nums b { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.nums span { font-size: 12px; font-weight: 600; color: var(--faint); }
+
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 560px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.tile { appearance: none; border: 0; margin: 0; text-align: left; font: inherit; color: inherit; background: var(--surface); border-radius: var(--r); padding: 8px 8px 12px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; min-width: 0; }
+.tile:active { transform: scale(.98); }
+.art { position: relative; }
+.icon { display: block; width: 100%; max-width: 100%; aspect-ratio: 1; border-radius: 13px; object-fit: cover; background: var(--raised); }
+.ph { display: grid; place-items: center; font-weight: 800; color: var(--muted); background: var(--raised); }
+.icon.ph { font-size: 34px; }
+.rank-badge { position: absolute; top: 6px; left: 6px; background: var(--scrim); color: var(--fg); font-size: 12px; font-weight: 800; border-radius: 999px; padding: 2px 8px; }
+.tname { font-size: 15px; font-weight: 800; line-height: 1.25; padding: 0 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.tmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 0 4px; font-size: 13px; font-weight: 700; color: var(--muted); font-variant-numeric: tabular-nums; }
+.up { color: var(--ok); }
+.down { color: var(--bad); }
+
+.profile, .cta { background: var(--surface); border-radius: var(--r); padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
+.avatar { width: 46px; height: 46px; border-radius: 50%; object-fit: cover; flex: none; background: var(--raised); }
+.avatar.ph { font-size: 18px; }
+.txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.txt b { font-size: 16px; font-weight: 800; overflow-wrap: anywhere; }
+.txt span { color: var(--muted); font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.mini { appearance: none; border: 0; background: var(--raised); color: var(--fg); font: 700 13px var(--font); border-radius: 999px; padding: 8px 14px; cursor: pointer; flex: none; }
+.cta { flex-wrap: wrap; }
+.cta .btn { flex: none; }
+.comm-h { display: flex; align-items: center; gap: 10px; padding: 10px 4px 0; }
+.cicon { width: 34px; height: 34px; border-radius: 10px; object-fit: cover; flex: none; }
+.cicon.ph { font-size: 15px; }
+
+.empty { background: var(--surface); border-radius: var(--r); padding: 32px 20px; text-align: center; color: var(--muted); display: flex; flex-direction: column; gap: 6px; align-items: center; }
+.empty strong { color: var(--fg); font-size: 17px; font-weight: 800; }
+
+.dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; display: flex; justify-content: center; align-items: center; gap: 10px; padding: 0 max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 14px) max(16px, env(safe-area-inset-left, 0px)); pointer-events: none; }
+.dock > * { pointer-events: auto; }
+.tabs, .fab { background: color-mix(in srgb, var(--raised) 85%, transparent); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(0, 0, 0, .6); }
+.tabs { flex: 1 1 auto; max-width: 300px; min-width: 0; display: flex; gap: 2px; padding: 5px; border-radius: 999px; }
+.tabs button { flex: 1 1 0; min-width: 0; appearance: none; border: 0; background: none; color: var(--muted); font: 700 11px var(--font); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 0 6px; border-radius: 999px; cursor: pointer; transition: background-color .15s, color .15s; }
+.tabs button[aria-selected="true"] { background: var(--fg); color: var(--bg); }
+.fab { flex: none; width: 64px; height: 64px; border-radius: 50%; color: var(--fg); display: grid; place-items: center; cursor: pointer; padding: 0; }
+.fab:active { transform: scale(.94); }
+@media (prefers-reduced-motion: reduce) { .tabs button { transition: none; } }
+
+.sheet-bg { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); z-index: 20; display: flex; align-items: flex-end; justify-content: center; }
+.sheet { box-sizing: border-box; width: 100%; max-width: 640px; max-height: 92%; overflow-y: auto; background: var(--surface); border-radius: 26px 26px 0 0; padding: 10px max(18px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 20px) max(18px, env(safe-area-inset-left, 0px)); animation: up .2s ease-out; }
+@keyframes up { from { transform: translateY(40px); } }
+@media (prefers-reduced-motion: reduce) { .sheet { animation: none; } }
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.grabber { width: 38px; height: 5px; border-radius: 3px; background: var(--line); align-self: center; }
+.sheet h2 { margin: 0; font-size: 22px; font-weight: 800; line-height: 1.15; overflow-wrap: anywhere; }
+.sheet .list { background: var(--raised); }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field label { font-size: 13px; font-weight: 700; color: var(--muted); padding-left: 4px; }
+.grid2, .grid3 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.grid3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+input, select, textarea { font: 600 16px var(--font); color: var(--fg); background-color: var(--raised); border: 1px solid transparent; border-radius: 14px; padding: 12px 14px; width: 100%; box-sizing: border-box; min-width: 0; margin: 0; }
+input::placeholder, textarea::placeholder { color: var(--faint); }
+input[type=date] { -webkit-appearance: none; appearance: none; min-height: 48px; }
+select { -webkit-appearance: none; appearance: none; padding-right: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%239b9ba3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+textarea { min-height: 90px; resize: vertical; }
+.toggle { display: flex; gap: 10px; align-items: center; font-size: 15px; font-weight: 700; color: var(--muted); padding-left: 4px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; padding-top: 4px; }
+.actions .right { display: flex; gap: 10px; margin-left: auto; }
+.btn { appearance: none; border: 0; background: var(--raised); color: var(--fg); font: 700 15px var(--font); border-radius: 999px; padding: 12px 20px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.btn.primary { background: var(--fg); color: var(--bg); }
+.btn.danger { color: var(--bad); }
+.btn.danger.armed { background: var(--bad); color: var(--bg); }
+.btn:disabled { opacity: .5; }
+.sheet .btn:not(.primary):not(.danger) { background: var(--raised); }
+.fine { color: var(--faint); font-size: 13px; font-weight: 600; margin: 0; }
+
+.dhead { display: flex; gap: 14px; align-items: center; }
+.dicon { width: 80px; height: 80px; border-radius: 20px; flex: none; object-fit: cover; }
+.dicon.ph { font-size: 30px; }
+.dtitle { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.dstats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--line); border-radius: 16px; overflow: hidden; }
+.dstats div { background: var(--raised); padding: 10px 12px; display: flex; flex-direction: column; min-width: 0; }
+.dstats b { font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+.dstats span { font-size: 12px; font-weight: 600; color: var(--faint); }
+.sec { display: flex; flex-direction: column; gap: 8px; }
+.sec h3 { margin: 0; font-size: 17px; font-weight: 800; }
+.bul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.bul li { position: relative; padding-left: 18px; color: var(--muted); font-size: 15px; font-weight: 600; line-height: 1.4; }
+.bul li::before { content: ""; position: absolute; left: 3px; top: .55em; width: 6px; height: 6px; border-radius: 50%; background: var(--fg); }
+.about { color: var(--muted); font-size: 14px; font-weight: 600; white-space: pre-line; margin: 0; overflow-wrap: anywhere; }
+
+.welcome { position: fixed; inset: 0; z-index: 25; background: var(--bg); overflow-y: auto; isolation: isolate; }
+.welcome-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.welcome-bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, transparent 45%, color-mix(in srgb, var(--bg) 55%, transparent) 100%); }
+.aurora { position: absolute; border-radius: 50%; filter: blur(40px); opacity: .9; animation: drift 18s ease-in-out infinite alternate; }
+.aurora.a1 { width: 85vmax; height: 85vmax; top: -38vmax; left: -34vmax; background: radial-gradient(circle, var(--glow1), transparent 64%); }
+.aurora.a2 { width: 80vmax; height: 80vmax; bottom: -36vmax; right: -36vmax; background: radial-gradient(circle, var(--glow2), transparent 64%); animation-duration: 23s; animation-delay: -7s; }
+.aurora.a3 { width: 60vmax; height: 60vmax; top: 34%; left: 12%; background: radial-gradient(circle, var(--glow3), transparent 64%); opacity: .55; animation-duration: 27s; animation-delay: -13s; }
+@keyframes drift { 0% { transform: translate(0, 0) scale(1); } 50% { transform: translate(7vmax, 5vmax) scale(1.1); } 100% { transform: translate(-5vmax, 9vmax) scale(.94); } }
+.block { position: absolute; bottom: -60px; left: var(--x); width: var(--size); height: var(--size); border-radius: 26%; border: 1.5px solid color-mix(in srgb, var(--fg) 16%, transparent); background: color-mix(in srgb, var(--fg) 4%, transparent); animation: float var(--dur) linear var(--delay) infinite; }
+@keyframes float { 0% { transform: translateY(0) rotate(0deg); opacity: 0; } 12% { opacity: 1; } 88% { opacity: 1; } 100% { transform: translateY(-115vh) rotate(var(--rot)); opacity: 0; } }
+.welcome-in { position: relative; box-sizing: border-box; max-width: 480px; margin: 0 auto; padding: calc(env(safe-area-inset-top, 0px) + 44px) max(20px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 28px) max(20px, env(safe-area-inset-left, 0px)); display: flex; flex-direction: column; gap: 14px; }
+.logo { position: relative; width: 68px; height: 68px; border-radius: 20px; background: var(--fg); color: var(--bg); display: grid; place-items: center; box-shadow: 0 0 44px color-mix(in srgb, var(--glow1) 70%, transparent); animation: bob 5s ease-in-out infinite; }
+.logo::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; border: 2px solid color-mix(in srgb, var(--fg) 55%, transparent); animation: ring 2.8s ease-out infinite; }
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-6px) rotate(3deg); } }
+@keyframes ring { from { transform: scale(1); opacity: .9; } to { transform: scale(1.65); opacity: 0; } }
+.welcome h2 { font-size: 34px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; margin: 12px 0 0; }
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .welcome h2 { background: linear-gradient(100deg, var(--fg) 35%, var(--glow-text) 50%, var(--fg) 65%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shine 5s ease-in-out infinite; }
+}
+@keyframes shine { from { background-position: 120% 0; } to { background-position: -120% 0; } }
+.lead { color: var(--muted); font-size: 16px; font-weight: 600; margin: 0 0 6px; }
+.step { background: color-mix(in srgb, var(--surface) 72%, transparent); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border: 1px solid color-mix(in srgb, var(--fg) 9%, transparent); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.step-row { display: flex; align-items: center; gap: 12px; }
+.badge { width: 26px; height: 26px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 13px; font-weight: 800; color: var(--muted); border: 2px solid var(--faint); box-sizing: border-box; }
+.badge.done { border: 0; background: var(--ok) var(--check) center / 14px 14px no-repeat; }
+.connect { display: flex; gap: 8px; }
+.connect input { flex: 1; }
+.linkbtn { appearance: none; background: none; border: 0; color: var(--muted); font: 700 15px var(--font); padding: 12px; cursor: pointer; align-self: center; }
+.welcome .btn.primary { box-shadow: 0 0 26px color-mix(in srgb, var(--glow-text) 45%, transparent); }
+.reveal { animation: rise-in .7s cubic-bezier(.2, .8, .2, 1) both; animation-delay: calc(var(--i, 0) * 90ms); }
+@keyframes rise-in { from { transform: translateY(26px) scale(.97); } }
+.spark { position: fixed; z-index: 40; width: 8px; height: 8px; border-radius: 2px; pointer-events: none; animation: spark 1.1s cubic-bezier(.15, .7, .3, 1) forwards; }
+@keyframes spark { from { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; } to { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(260deg); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .aurora, .logo, .logo::after, .welcome h2, .reveal { animation: none !important; } .block { display: none; } }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); background: var(--raised); color: var(--fg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 700; z-index: 30; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0, 0, 0, .6); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="top">
+      <span class="app">RoHub</span>
+      <button class="iconbtn" id="settingsBtn" aria-label="Settings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+    </div>
+    <h1 id="title">Ideas</h1>
+    <p class="subtitle" id="subtitle"></p>
+  </header>
+  <main id="main"></main>
+</div>
+<div class="dock">
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
+  <button class="fab" id="fab" aria-label="Add"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+</div>
+<div id="sheetRoot"></div>
+<div id="welcomeRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+const ICONS = {
+  ideas: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2h5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z"/>',
+  tasks: '<circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/>',
+  games: '<rect x="2.5" y="7" width="19" height="11" rx="5.5"/><path d="M7.5 10.5v4M5.5 12.5h4"/><circle cx="15.5" cy="11.5" r="1" fill="currentColor" stroke="none"/><circle cx="17.5" cy="13.8" r="1" fill="currentColor" stroke="none"/>',
+  trending: '<path d="m3 17 6-6 4 4 8-8"/><path d="M15 7h6v6"/>',
+};
+const icon = (paths, size = 22) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths}</svg>`;
+
+const TABS = [
+  { id: 'ideas', label: 'Ideas', title: 'Ideas', kind: 'idea' },
+  { id: 'tasks', label: 'Tasks', title: 'Tasks', kind: 'task' },
+  { id: 'games', label: 'Games', title: 'My games', kind: 'game' },
+  { id: 'trending', label: 'Trending', title: 'Trending', kind: null },
+];
+
+const SCHEMA = {
+  idea: { title: 'Idea', fields: [
+    { k: 'title', label: 'Idea', type: 'text', req: true, ph: 'Chess pieces fight with weapons…' },
+    { k: 'genre', label: 'Genre', type: 'text', ph: 'Obby, tycoon, PvP…', half: true },
+    { k: 'stage', label: 'Stage', type: 'select', opts: ['Spark', 'Planning', 'Prototyping', 'Shelved'], half: true },
+    { k: 'hot', label: 'Favourite idea', type: 'bool' },
+    { k: 'notes', label: 'Notes', type: 'area' },
+  ]},
+  task: { title: 'Task', fields: [
+    { k: 'title', label: 'Task', type: 'text', req: true, ph: 'Fix knight sword welds' },
+    { k: 'game', label: 'Game', type: 'text', ph: 'Catastrophic Chess', half: true },
+    { k: 'due', label: 'Due', type: 'date', half: true },
+    { k: 'priority', label: 'Priority', type: 'select', opts: ['Normal', 'High', 'Low'] },
+    { k: 'done', label: 'Done', type: 'bool' },
+  ]},
+  game: { title: 'Game', fields: [
+    { k: 'name', label: 'Game name', type: 'text', req: true },
+    { k: 'status', label: 'Status', type: 'select', opts: ['In development', 'Testing', 'Released', 'Paused', 'Shut down'], half: true },
+    { k: 'released', label: 'Release date', type: 'date', half: true },
+    { k: 'peakCcu', label: 'Peak CCU (players at once)', type: 'num', half: true },
+    { k: 'visits', label: 'Visits', type: 'num', half: true },
+    { k: 'adCredits', label: 'Ad credits spent', type: 'num', half: true },
+    { k: 'robux', label: 'Robux earned', type: 'num', half: true },
+    { k: 'favorites', label: 'Favorites', type: 'num', half: true },
+    { k: 'likeRatio', label: 'Like ratio %', type: 'num', half: true },
+    { k: 'link', label: 'Game link', type: 'text', ph: 'https://www.roblox.com/games/…' },
+    { k: 'notes', label: 'Notes / what I learned', type: 'area' },
+  ]},
+};
+
+// Everything personal lives in this browser; Roblox data comes live from Roblox through RoProxy,
+// a public proxy that lets websites read Roblox's APIs.
+const STORE_KEY = 'rohub-v1';
+const RP = { users: 'https://users.roproxy.com', games: 'https://games.roproxy.com', thumbs: 'https://thumbnails.roproxy.com', groups: 'https://groups.roproxy.com' };
+const PLAYER_TTL = 10 * 60 * 1000;
+const USERNAME_RE = /^[A-Za-z0-9_]{3,20}$/;
+const STAFF_RE = /\b(?:owner|co-owner|admin|administrator|dev|developer|builder|scripter|modeler|designer|staff|creator|manager|founder)s?\b/i;
+const FAN_RE = /\bfans?\b/i;
+
+const state = { tab: 'ideas', items: [], link: null, player: null, playerAt: 0, prefs: {}, trending: null, trendingError: false, loadingPlayer: false, playerError: false, welcomeOpen: false, welcomeDone: false };
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const num = v => Number(v) || 0;
+function fmt(n) {
+  n = num(n);
+  const a = Math.abs(n);
+  if (a >= 1e9) return +(n / 1e9).toFixed(1) + 'B';
+  if (a >= 1e6) return +(n / 1e6).toFixed(1) + 'M';
+  if (a >= 1e4) return +(n / 1e3).toFixed(1) + 'K';
+  return n.toLocaleString('en-US');
+}
+const stat = v => v == null || v === '' ? '–' : fmt(v);
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const today = () => new Date().toISOString().slice(0, 10);
+const shortDate = ms => new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+const shortTime = ms => new Date(ms).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+const excerpt = (t, n) => { const s = String(t || '').replace(/\r/g, '').replace(/\n{3,}/g, '\n\n').trim(); return s.length > n ? s.slice(0, n).trimEnd() + '…' : s; };
+const sameName = (a, b) => String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase();
+function niceDate(d) {
+  if (!d) return '';
+  const dt = new Date(d + 'T00:00:00');
+  return isNaN(dt) ? d : dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: dt.getFullYear() === new Date().getFullYear() ? undefined : 'numeric' });
+}
+function ago(iso) {
+  const t = Date.parse(iso);
+  if (!t) return '–';
+  const s = Math.max(0, (Date.now() - t) / 1000);
+  if (s < 3600) return Math.max(1, Math.round(s / 60)) + ' min ago';
+  if (s < 86400) return Math.round(s / 3600) + ' h ago';
+  const d = Math.round(s / 86400);
+  if (d < 60) return plural(d, 'day') + ' ago';
+  const m = Math.round(d / 30.4);
+  return m < 24 ? m + ' mo ago' : Math.round(d / 365) + ' yr ago';
+}
+function monthYear(iso) {
+  const t = new Date(iso);
+  if (isNaN(t)) return '–';
+  return t.toLocaleDateString('en-US', t.getFullYear() === new Date().getFullYear() ? { month: 'short', day: 'numeric' } : { month: 'short', year: 'numeric' });
+}
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = msg;
+  $('#toastRoot').replaceChildren(el);
+  setTimeout(() => el.remove(), 3400);
+}
+
+/* ---------- storage: this device only ---------- */
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY)) || {};
+    state.items = Array.isArray(d.items) ? d.items : [];
+    state.link = d.link && d.link.username ? d.link : null;
+    state.player = d.player || null;
+    state.playerAt = d.playerAt || 0;
+    state.prefs = d.prefs || {};
+  } catch {}
+}
+function persist() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({ items: state.items, link: state.link, player: state.player, playerAt: state.playerAt, prefs: state.prefs }));
+    return true;
+  } catch {
+    toast('Couldn’t save on this device. Check that your browser allows website data.');
+    return false;
+  }
+}
+function saveItem(item) {
+  const { id, ...body } = item;
+  if (id) { const i = state.items.findIndex(x => x.id === id); if (i >= 0) state.items[i] = { id, ...body }; else state.items.push({ id, ...body }); }
+  else state.items.push({ id: 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), ...body });
+  persist(); render(); return true;
+}
+function removeItem(id) {
+  state.items = state.items.filter(x => x.id !== id);
+  persist(); render(); return true;
+}
+
+/* ---------- Roblox (live, through RoProxy) ---------- */
+async function getJSON(url, opts = {}, tries = 2) {
+  // Roblox translates game names to the browser's language; ask for the names as published (English).
+  const req = { ...opts, headers: { 'Accept-Language': 'en-US', ...(opts.headers || {}) } };
+  for (let i = 0; ; i++) {
+    const r = await fetch(url, req).catch(() => null);
+    if (r && r.ok) return r.json();
+    if (i + 1 >= tries || (r && ![429, 500, 502, 503, 504].includes(r.status))) throw new Error(r ? 'HTTP ' + r.status : 'network');
+    await new Promise(res => setTimeout(res, 1200 * (i + 1)));
+  }
+}
+const chunk = (arr, n) => Array.from({ length: Math.ceil(arr.length / n) }, (_, i) => arr.slice(i * n, i * n + n));
+async function collectGames(url, limit) {
+  const ids = [];
+  let cursor = '';
+  for (let page = 0; page < 3; page++) {
+    const res = await getJSON(url + (cursor ? '&cursor=' + encodeURIComponent(cursor) : ''));
+    (res.data || []).forEach(g => { if (g.id && !ids.includes(g.id)) ids.push(g.id); });
+    cursor = res.nextPageCursor;
+    if (!cursor || ids.length >= limit) break;
+  }
+  return ids.slice(0, limit);
+}
+async function byIds(base, ids, pick) {
+  const out = {};
+  for (const part of chunk(ids, 50)) (await getJSON(base + part.join(','))).data?.forEach(x => pick(out, x));
+  return out;
+}
+const gameDetails = ids => byIds(`${RP.games}/v1/games?universeIds=`, ids, (o, g) => { o[g.id] = g; });
+const thumbsOf = (base, ids) => ids.length ? byIds(base, ids, (o, t) => { if (t.state === 'Completed' && t.imageUrl) o[t.targetId] = t.imageUrl; }) : Promise.resolve({});
+async function resolveCommunity(inp) {
+  const s = String(inp || '').trim();
+  const m = s.match(/\/(?:communities|groups)\/(\d+)/) || s.match(/^#?(\d{2,12})$/);
+  let id = m ? +m[1] : null;
+  if (!id && s) {
+    const res = await getJSON(`${RP.groups}/v1/groups/search/lookup?groupName=${encodeURIComponent(s)}`);
+    id = (res.data || []).find(g => sameName(g.name, s))?.id || null;
+  }
+  if (!id) return null;
+  const info = await getJSON(`${RP.groups}/v1/groups/${id}`).catch(() => null);
+  return info ? { id, name: info.name || String(id), memberCount: info.memberCount } : null;
+}
+async function fetchPlayer(link) {
+  const inputs = link.communities || [];
+  const base = { username: link.username, inputs: [...inputs], syncedAt: Date.now() };
+  // A text/plain body keeps this a "simple" request, so the browser doesn't need a preflight RoProxy can't answer.
+  const res = await getJSON(`${RP.users}/v1/usernames/users`, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify({ usernames: [link.username], excludeBannedUsers: true }) });
+  const u = (res.data || [])[0];
+  if (!u) return { ...base, status: 'not_found', games: [], communities: [], suggested: [] };
+  const rid = u.id;
+  const [profile, roles, heads] = await Promise.all([
+    collectGames(`${RP.games}/v2/users/${rid}/games?accessFilter=2&limit=50&sortOrder=Desc`, 30),
+    getJSON(`${RP.groups}/v1/users/${rid}/groups/roles`).then(r => r.data || []).catch(() => []),
+    thumbsOf(`${RP.thumbs}/v1/users/avatar-headshot?size=150x150&format=Webp&isCircular=false&userIds=`, [rid]).catch(() => ({})),
+  ]);
+  const comms = new Map(), missing = [];
+  roles.filter(r => r.role?.rank === 255).slice(0, 5).forEach(r => comms.set(r.group.id, { id: r.group.id, name: r.group.name, memberCount: r.group.memberCount, owned: true, input: null }));
+  for (const inp of inputs.slice(0, 8)) {
+    const c = await resolveCommunity(inp).catch(() => null);
+    if (!c) missing.push({ input: inp, status: 'not_found' });
+    else if (comms.has(c.id)) comms.get(c.id).input = inp;
+    else comms.set(c.id, { ...c, owned: false, input: inp });
+  }
+  for (const c of comms.values()) c.gameIds = await collectGames(`${RP.games}/v2/groups/${c.id}/gamesV2?accessFilter=2&limit=50&sortOrder=Desc`, 30).catch(() => []);
+  // Owned communities without public games stay hidden; ones the player added always show.
+  const shown = [...comms.values()].filter(c => c.input || c.gameIds.length);
+  const seen = new Set(), pairs = [];
+  [...profile.map(id => [id, null]), ...shown.flatMap(c => c.gameIds.map(id => [id, c]))].forEach(([id, c]) => { if (!seen.has(id)) { seen.add(id); pairs.push([id, c]); } });
+  const ids = pairs.slice(0, 60).map(p => p[0]);
+  const [details, icons, gicons] = await Promise.all([
+    ids.length ? gameDetails(ids) : {},
+    thumbsOf(`${RP.thumbs}/v1/games/icons?returnPolicy=PlaceHolder&size=256x256&format=Webp&isCircular=false&universeIds=`, ids).catch(() => ({})),
+    thumbsOf(`${RP.thumbs}/v1/groups/icons?size=150x150&format=Webp&isCircular=false&groupIds=`, shown.map(c => c.id)).catch(() => ({})),
+  ]);
+  const games = pairs.slice(0, 60).filter(([id]) => details[id]).map(([id, c]) => {
+    const d = details[id];
+    // Roblox translates names to the browser's language; show what the creator actually wrote.
+    return { key: String(id), universeId: id, placeId: d.rootPlaceId, name: d.sourceName || d.name, ccu: d.playing || 0, visits: d.visits, favorites: d.favoritedCount, likeRatio: null,
+      genre: d.genre_l1 || '', genre2: d.genre_l2 || '', creator: d.creator?.name || '', created: d.created, updated: d.updated, about: excerpt(d.sourceDescription || d.description, 420),
+      url: d.rootPlaceId ? `https://www.roblox.com/games/${d.rootPlaceId}` : '', icon: icons[id] || '',
+      source: c ? 'community' : 'profile', communityId: c ? c.id : null, communityName: c ? c.name : null };
+  }).sort((a, b) => b.ccu - a.ccu || num(b.visits) - num(a.visits));
+  const suggested = roles.filter(r => !comms.has(r.group.id) && !FAN_RE.test(r.role?.name || '') && ((r.role?.rank || 0) >= 200 || STAFF_RE.test(r.role?.name || '')))
+    .slice(0, 12).map(r => ({ id: r.group.id, name: r.group.name, role: r.role?.name, memberCount: r.group.memberCount }));
+  const total = k => games.reduce((s, g) => s + num(g[k]), 0);
+  return { ...base, status: 'ok', robloxUserId: rid, robloxName: u.name, displayName: u.displayName, avatar: heads[rid] || '', games, suggested,
+    communities: [...shown.map(c => ({ id: c.id, name: c.name, memberCount: c.memberCount, owned: c.owned, input: c.input, icon: gicons[c.id] || '', games: games.filter(g => g.communityId === c.id).length })), ...missing],
+    totals: { games: games.length, playing: total('ccu'), visits: total('visits'), favorites: total('favorites') } };
+}
+const sameList = (a, b) => JSON.stringify((a || []).map(x => String(x).trim().toLowerCase())) === JSON.stringify((b || []).map(x => String(x).trim().toLowerCase()));
+async function refreshPlayer(force) {
+  if (!state.link || state.loadingPlayer) return;
+  const p = state.player;
+  const fresh = p && sameName(p.username, state.link.username) && sameList(p.inputs, state.link.communities) && Date.now() - state.playerAt < PLAYER_TTL;
+  if (fresh && !force) return;
+  state.loadingPlayer = true; state.playerError = false; render();
+  try {
+    const link = state.link;
+    const next = await fetchPlayer(link);
+    if (state.link === link) { state.player = next; state.playerAt = Date.now(); persist(); }
+  } catch { state.playerError = true; }
+  state.loadingPlayer = false; render();
+  if (sheetName === 'communities') openCommunities();
+}
+
+/* ---------- trending (built in the cloud every 30 minutes) ---------- */
+async function loadTrending() {
+  try {
+    const r = await fetch('data/trending.json?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    state.trending = await r.json();
+    state.trendingError = false;
+  } catch { state.trendingError = !state.trending; }
+  render();
+}
+
+/* ---------- derived data ---------- */
+const byKind = k => state.items.filter(i => i.kind === k);
+function rbxStatus() {
+  if (!state.link) return 'none';
+  const p = state.player;
+  if (!p || !sameName(p.username, state.link.username)) return state.playerError ? 'error' : 'pending';
+  return p.status === 'ok' ? 'ok' : 'not_found';
+}
+const connectedGames = () => rbxStatus() === 'ok' ? (state.player.games || []) : [];
+function extrasFor(g) {
+  const games = byKind('game');
+  return games.find(i => i.universeId && String(i.universeId) === String(g.universeId)) || games.find(i => !i.universeId && sameName(i.name, g.name));
+}
+function manualGames() {
+  const linked = connectedGames();
+  const ids = new Set(linked.map(g => String(g.universeId)));
+  return byKind('game').filter(i => !(i.universeId && ids.has(String(i.universeId))) && !linked.some(g => sameName(g.name, i.name)));
+}
+// Communities added on this device that the last Roblox refresh hasn't looked up yet.
+const pendingCommunities = p => (state.link?.communities || []).filter(x => !(p.communities || []).some(c => sameName(c.input, x)));
+
+/* ---------- rendering ---------- */
+function renderTabs() {
+  $('#tabs').innerHTML = TABS.map(t =>
+    `<button role="tab" data-tab="${t.id}" aria-selected="${state.tab === t.id}">${icon(ICONS[t.id])}<span>${t.label}</span></button>`).join('');
+}
+function subtitle() {
+  if (state.tab === 'ideas') { const n = byKind('idea').length; return n ? plural(n, 'idea') : 'Write down anything worth building'; }
+  if (state.tab === 'tasks') { const all = byKind('task'), open = all.filter(t => !t.done).length; return all.length ? `${open} to do · ${all.length - open} done` : 'Your to-do list'; }
+  if (state.tab === 'games') {
+    if (rbxStatus() === 'ok') { const p = state.player; return `@${p.robloxName || p.username} · ${plural((p.games || []).length, 'game')} on Roblox`; }
+    const n = byKind('game').length; return n ? plural(n, 'game') + ' logged' : 'Every game you’ve made';
+  }
+  const s = state.trending;
+  return s ? `Updated ${shortDate(s.updatedAt)} at ${shortTime(s.updatedAt)}` : 'Top Roblox games right now';
+}
+const empty = (title, hint) => `<div class="empty"><strong>${title}</strong><span>${hint}</span></div>`;
+const art = (src, name, cls) => src ? `<img class="${cls}" src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="${cls} ph" aria-hidden="true">${esc(String(name || '?').trim().charAt(0).toUpperCase())}</div>`;
+const changeChip = g => g.change == null ? '' : `<span class="${g.change >= 0 ? 'up' : 'down'}">${g.change >= 0 ? '▲' : '▼'} ${Math.abs(Math.round(g.change * 100))}%</span>`;
+
+function renderIdeas() {
+  const list = byKind('idea').sort((a, b) => (b.hot ? 1 : 0) - (a.hot ? 1 : 0) || (b.createdAt || 0) - (a.createdAt || 0));
+  if (!list.length) return empty('No ideas yet', 'Tap + to write down your first game idea.');
+  return `<div class="list">${list.map(i => `
+    <div class="row" data-edit="${i.id}">
+      <div class="body">
+        <div class="t">${esc(i.title)}</div>
+        <div class="meta">
+          ${i.hot ? '<span class="chip hot">★ Favourite</span>' : ''}
+          ${i.stage ? `<span class="chip ${i.stage === 'Prototyping' ? 'ok' : ''}">${esc(i.stage)}</span>` : ''}
+          ${i.genre ? `<span class="chip">${esc(i.genre)}</span>` : ''}
+        </div>
+        ${i.notes ? `<div class="notes">${esc(i.notes)}</div>` : ''}
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+function taskRow(t) {
+  const overdue = !t.done && t.due && t.due < today();
+  return `<div class="row ${t.done ? 'done' : ''}" data-edit="${t.id}">
+    <input type="checkbox" class="check" data-toggle="${t.id}" ${t.done ? 'checked' : ''} aria-label="Mark done">
+    <div class="body">
+      <div class="t">${esc(t.title)}</div>
+      <div class="meta">
+        ${t.priority === 'High' && !t.done ? '<span class="chip warn">High</span>' : ''}
+        ${t.due ? `<span class="chip ${overdue ? 'bad' : ''}">${overdue ? 'Overdue · ' : ''}${niceDate(t.due)}</span>` : ''}
+        ${t.game ? `<span class="sub">${esc(t.game)}</span>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+function renderTasks() {
+  const all = byKind('task');
+  if (!all.length) return empty('Nothing to do yet', 'Tap + to add a task, like “Redesign lobby UI”.');
+  const pr = { High: 0, Normal: 1, Low: 2 };
+  const open = all.filter(t => !t.done).sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999') || (pr[a.priority] ?? 1) - (pr[b.priority] ?? 1));
+  const done = all.filter(t => t.done).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  return `
+    <div class="group-h">To do</div>
+    ${open.length ? `<div class="list">${open.map(taskRow).join('')}</div>` : '<div class="banner">All caught up.</div>'}
+    ${done.length ? `<div class="group-h">Done</div><div class="list">${done.map(taskRow).join('')}</div>` : ''}`;
+}
+
+function statusChip(s) {
+  const cls = { Released: 'ok', Testing: 'warn', 'In development': '', Paused: '', 'Shut down': 'bad' }[s] ?? '';
+  return s ? `<span class="chip ${cls}">${esc(s)}</span>` : '';
+}
+function manualRows(games) {
+  return `<div class="list">${games.map(g => `
+    <div class="row" data-edit="${g.id}">
+      <div class="body">
+        <div class="t">${esc(g.name)}</div>
+        <div class="meta">${statusChip(g.status)}${g.released ? `<span class="sub">${niceDate(g.released)}</span>` : ''}${g.likeRatio ? `<span class="sub">· ${num(g.likeRatio)}% likes</span>` : ''}</div>
+        <div class="nums">
+          <div><b>${stat(g.peakCcu)}</b><span>Peak CCU</span></div>
+          <div><b>${stat(g.visits)}</b><span>Visits</span></div>
+          <div><b>${stat(g.adCredits)}</b><span>Ad credits</span></div>
+          <div><b>${stat(g.robux)}</b><span>Robux</span></div>
+        </div>
+        ${g.notes ? `<div class="notes">${esc(g.notes)}</div>` : ''}
+      </div>
+    </div>`).join('')}</div>`;
+}
+const statTiles = cells => `<div class="stats">${cells.map(([label, value]) => `<div class="stat"><span>${label}</span><b>${value}</b></div>`).join('')}</div>`;
+const cta = (title, hint, label, act) => `<div class="cta">
+    <div class="txt"><b>${title}</b><span>${hint}</span></div>
+    <button class="btn primary" data-act="${act}">${label}</button>
+  </div>`;
+const ownTile = g => `
+      <button class="tile" data-own="${esc(g.key)}">
+        <div class="art">${art(g.icon, g.name, 'icon')}</div>
+        <div class="tname">${esc(g.name)}</div>
+        <div class="tmeta">${g.ccu ? fmt(g.ccu) + ' playing' : stat(g.visits) + ' visits'}</div>
+      </button>`;
+
+function renderGames() {
+  const st = rbxStatus();
+  const manual = manualGames().sort((a, b) => (b.released || '').localeCompare(a.released || '') || (b.createdAt || 0) - (a.createdAt || 0));
+  let html = '';
+  if (st === 'none') html += cta('Connect your Roblox account', 'See all your games with icons, players and visits. No password needed.', 'Connect', 'account');
+  if (st === 'pending') html += `<div class="banner">Loading <b>@${esc(state.link.username)}</b>’s games from Roblox…</div>`;
+  if (st === 'error') html += cta('Couldn’t reach Roblox', 'Check your connection and try again.', 'Retry', 'refresh');
+  if (st === 'not_found') html += cta(`Couldn’t find @${esc(state.link.username)}`, 'Check the spelling of your Roblox username.', 'Fix', 'account');
+  if (st === 'ok') {
+    const p = state.player, linked = p.games || [];
+    const mine = [...linked.map(extrasFor).filter(Boolean), ...manual];
+    const sum = k => mine.reduce((acc, g) => acc + num(g[k]), 0);
+    html += `<div class="profile">
+      ${art(p.avatar, p.displayName || p.username, 'avatar')}
+      <div class="txt"><b>${esc(p.displayName || p.robloxName || p.username)}</b><span>@${esc(p.robloxName || p.username)} · ${state.loadingPlayer ? 'updating…' : 'updated ' + ago(new Date(state.playerAt || p.syncedAt).toISOString())}</span></div>
+      <button class="mini" data-act="refresh" ${state.loadingPlayer ? 'disabled' : ''}>Refresh</button>
+    </div>`;
+    if (state.playerError) html += '<div class="banner">Couldn’t refresh from Roblox just now, so these numbers may be a little old.</div>';
+    html += statTiles([['Playing now', fmt(p.totals?.playing)], ['Total visits', fmt(p.totals?.visits)], ['Ad credits spent', fmt(sum('adCredits'))], ['Robux earned', fmt(sum('robux'))]]);
+    const onProfile = linked.filter(g => g.source !== 'community');
+    const comms = (p.communities || []).filter(c => c.id);
+    if (onProfile.length) html += `<div class="group-h">On your profile</div><div class="grid">${onProfile.map(ownTile).join('')}</div>`;
+    comms.forEach(c => {
+      const cg = linked.filter(g => g.communityId === c.id);
+      html += `<div class="comm-h">${art(c.icon, c.name, 'cicon')}<div class="txt"><b>${esc(c.name)}</b><span>Community · ${fmt(c.memberCount)} members${c.owned ? ' · you own it' : ''}</span></div></div>`;
+      html += cg.length ? `<div class="grid">${cg.map(ownTile).join('')}</div>` : '<div class="banner">No public games in this community yet.</div>';
+    });
+    pendingCommunities(p).forEach(x => { html += `<div class="banner">Adding <b>${esc(x)}</b>…</div>`; });
+    (p.communities || []).filter(c => c.status === 'not_found').forEach(c => { html += `<div class="banner">Couldn’t find the community <b>${esc(c.input)}</b>. Check the link or exact name.</div>`; });
+    if (!onProfile.length && !comms.length) html += '<div class="banner">No public games on your profile. If you publish under a community, add it below.</div>';
+    html += cta('Your communities', 'Add the Roblox communities (groups) you publish games under.', comms.length || (state.link.communities || []).length ? 'Edit' : 'Add', 'communities');
+    if (manual.length) html += '<div class="group-h">Other games</div>' + manualRows(manual);
+    return html;
+  }
+  const sum = k => manual.reduce((acc, g) => acc + num(g[k]), 0);
+  html += statTiles([['Total visits', fmt(sum('visits'))], ['Best peak CCU', fmt(Math.max(0, ...manual.map(g => num(g.peakCcu))))], ['Ad credits spent', fmt(sum('adCredits'))], ['Robux earned', fmt(sum('robux'))]]);
+  html += manual.length ? manualRows(manual) : empty('No games logged yet', 'Tap + to add a game you’ve made, with its CCU, visits and ad spend.');
+  return html;
+}
+
+function renderTrending() {
+  const s = state.trending;
+  if (!s) return state.trendingError ? cta('Couldn’t load trending games', 'Check your connection and try again.', 'Retry', 'trending') : '<div class="banner">Loading what’s trending…</div>';
+  return ['Most played', 'Rising fast'].map(name => {
+    const list = (s.games || []).filter(g => g.list === name).sort((a, b) => a.rank - b.rank);
+    if (!list.length) return '';
+    return `<div class="group-h">${name}</div>
+      <div class="grid">${list.map(g => `
+        <button class="tile" data-trend="${esc(g.id)}">
+          <div class="art">${art(g.icon, g.name, 'icon')}<span class="rank-badge">#${g.rank}</span></div>
+          <div class="tname">${esc(g.name)}</div>
+          <div class="tmeta"><span>${fmt(g.ccu)} playing</span>${changeChip(g)}</div>
+        </button>`).join('')}</div>`;
+  }).join('');
+}
+
+function render() {
+  $('#title').textContent = TABS.find(t => t.id === state.tab).title;
+  $('#subtitle').textContent = subtitle();
+  renderTabs();
+  $('#main').innerHTML = { ideas: renderIdeas, tasks: renderTasks, games: renderGames, trending: renderTrending }[state.tab]();
+  $('#fab').hidden = state.tab === 'trending';
+  maybeWelcome();
+}
+
+/* ---------- sheets ---------- */
+let sheetName = null;
+function openSheet(inner, mount, name) {
+  sheetName = name || null;
+  $('#sheetRoot').innerHTML = `<div class="sheet-bg" id="sheetBg"><div class="sheet" role="dialog" aria-modal="true">${inner}</div></div>`;
+  const bg = $('#sheetBg');
+  bg.addEventListener('click', e => { if (e.target === bg) closeSheet(); });
+  bg.querySelectorAll('[data-close]').forEach(b => { b.onclick = closeSheet; });
+  if (mount) mount(bg.querySelector('.sheet'));
+}
+function closeSheet() { sheetName = null; $('#sheetRoot').innerHTML = ''; }
+// Two taps for anything that can't be undone.
+function armed(btn, label, run) {
+  btn.onclick = () => {
+    if (!btn.classList.contains('armed')) { btn.classList.add('armed'); btn.textContent = label; return; }
+    run();
+  };
+}
+
+function openForm(kind, item) {
+  const s = SCHEMA[kind];
+  const v = item || {};
+  const field = f => {
+    const id = 'f_' + f.k, val = v[f.k] ?? '';
+    let input;
+    if (f.type === 'select') input = `<select id="${id}" name="${f.k}">${f.opts.map(o => `<option ${o === val ? 'selected' : ''}>${o}</option>`).join('')}</select>`;
+    else if (f.type === 'area') input = `<textarea id="${id}" name="${f.k}" placeholder="${esc(f.ph || '')}">${esc(val)}</textarea>`;
+    else if (f.type === 'bool') return `<label class="toggle"><input type="checkbox" class="check" id="${id}" name="${f.k}" ${val ? 'checked' : ''}>${f.label}</label>`;
+    else input = `<input id="${id}" name="${f.k}" type="${f.type === 'num' ? 'number' : f.type}" ${f.type === 'num' ? 'inputmode="decimal" min="0" step="any"' : ''} value="${esc(val)}" placeholder="${esc(f.ph || '')}" ${f.req ? 'required' : ''}>`;
+    return `<div class="field"><label for="${id}">${f.label}</label>${input}</div>`;
+  };
+  // pair consecutive half-width fields
+  let body = '';
+  for (let i = 0; i < s.fields.length; i++) {
+    const f = s.fields[i];
+    if (f.half && s.fields[i + 1]?.half) { body += `<div class="grid2">${field(f)}${field(s.fields[i + 1])}</div>`; i++; }
+    else body += field(f);
+  }
+  openSheet(`<form class="stack" id="sheetForm" novalidate>
+      <div class="grabber"></div>
+      <h2>${item ? 'Edit' : 'New'} ${s.title.toLowerCase()}</h2>
+      ${body}
+      <div class="actions">
+        ${item ? '<button type="button" class="btn danger" id="delBtn">Delete</button>' : ''}
+        <div class="right">
+          <button type="button" class="btn" data-close>Cancel</button>
+          <button type="submit" class="btn primary">${item ? 'Save' : 'Add'}</button>
+        </div>
+      </div>
+    </form>`, () => {
+    const form = $('#sheetForm');
+    if (!item) setTimeout(() => form.querySelector('input:not([type=checkbox]),textarea')?.focus(), 50);
+    const del = $('#delBtn');
+    if (del) armed(del, 'Tap again to delete', () => { removeItem(item.id); closeSheet(); toast('Deleted'); });
+    form.onsubmit = e => {
+      e.preventDefault();
+      const out = { ...(item || {}), kind, updatedAt: Date.now() };
+      if (!item) out.createdAt = Date.now();
+      for (const f of s.fields) {
+        const el = form.elements[f.k];
+        if (f.type === 'bool') out[f.k] = el.checked;
+        else if (f.type === 'num') out[f.k] = el.value === '' ? null : Number(el.value);
+        else out[f.k] = el.value.trim();
+        if (f.req && (out[f.k] === '' || out[f.k] == null)) { el.focus(); toast(`Add a ${f.label.toLowerCase()} first.`); return; }
+      }
+      saveItem(out); closeSheet(); toast(item ? 'Saved' : 'Added');
+    };
+  });
+}
+
+function statsGrid(g) {
+  const cells = [[fmt(g.ccu), 'Playing now'], [stat(g.visits), 'Visits'], [g.likeRatio != null ? g.likeRatio + '%' : '–', 'Likes'],
+    [stat(g.favorites), 'Favorites'], [g.created ? monthYear(g.created) : '–', 'Released'], [g.updated ? ago(g.updated) : '–', 'Last update']];
+  return `<div class="dstats">${cells.map(([v, l]) => `<div><b>${esc(v)}</b><span>${l}</span></div>`).join('')}</div>`;
+}
+const bullets = (title, arr) => arr && arr.length ? `<div class="sec"><h3>${title}</h3><ul class="bul">${arr.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
+const gameHead = (g, chips) => `<div class="dhead">${art(g.icon, g.name, 'dicon')}
+    <div class="dtitle"><h2>${esc(g.name)}</h2>${g.creator ? `<span class="sub">by ${esc(g.creator)}</span>` : ''}<div class="meta">${chips}</div></div>
+  </div>`;
+const robloxLink = g => g.url ? `<a class="btn" href="${esc(g.url)}" target="_blank" rel="noopener">Open on Roblox</a>` : '';
+
+function openTrend(g) {
+  const change = g.change == null ? '' : `<div class="banner ${g.change >= 0 ? 'good' : ''}">${g.change >= 0 ? '▲' : '▼'} ${Math.abs(Math.round(g.change * 100))}% ${g.change >= 0 ? 'more' : 'fewer'} players than yesterday</div>`;
+  openSheet(`<div class="stack">
+      <div class="grabber"></div>
+      ${gameHead(g, `<span class="chip hot">#${g.rank} ${esc(g.list)}</span>${g.genre ? `<span class="chip">${esc(g.genre)}</span>` : ''}`)}
+      ${statsGrid(g)}
+      ${change}
+      ${bullets('Why it’s trending', g.why)}
+      ${bullets('What you could borrow', g.tips)}
+      ${g.about ? `<div class="sec"><h3>About the game</h3><p class="about">${esc(g.about)}</p></div>` : ''}
+      <div class="actions">${robloxLink(g)}<div class="right"><button class="btn primary" data-close>Done</button></div></div>
+    </div>`);
+}
+
+function openOwn(g) {
+  const ex = extrasFor(g) || {};
+  const numField = (id, label, val) => `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="number" inputmode="decimal" min="0" step="any" value="${esc(val ?? '')}"></div>`;
+  openSheet(`<form class="stack" id="ownForm" novalidate>
+      <div class="grabber"></div>
+      ${gameHead(g, `<span class="chip ok">${g.communityName ? esc(g.communityName) : 'On Roblox'}</span>${g.genre ? `<span class="chip">${esc(g.genre)}</span>` : ''}`)}
+      ${statsGrid(g)}
+      <div class="sec"><h3>Your numbers</h3><p class="fine">Saved only on this device. Roblox doesn’t share Robux or ad spend publicly, so add them from your Creator Dashboard.</p></div>
+      <div class="grid3">${numField('x_peak', 'Peak CCU', ex.peakCcu)}${numField('x_ads', 'Ad credits', ex.adCredits)}${numField('x_robux', 'Robux', ex.robux)}</div>
+      <div class="field"><label for="x_notes">Notes</label><textarea id="x_notes" placeholder="What worked, what to try next…">${esc(ex.notes || '')}</textarea></div>
+      <div class="actions">${robloxLink(g)}<div class="right"><button type="button" class="btn" data-close>Close</button><button type="submit" class="btn primary">Save</button></div></div>
+    </form>`, () => {
+    $('#ownForm').onsubmit = e => {
+      e.preventDefault();
+      const val = id => { const v = $('#' + id).value; return v === '' ? null : Number(v); };
+      saveItem({ ...ex, kind: 'game', universeId: g.universeId, name: g.name, status: ex.status || 'Released',
+        peakCcu: val('x_peak'), adCredits: val('x_ads'), robux: val('x_robux'), notes: $('#x_notes').value.trim(),
+        createdAt: ex.createdAt || Date.now(), updatedAt: Date.now() });
+      closeSheet(); toast('Saved');
+    };
+  });
+}
+
+/* ---------- Roblox account and communities ---------- */
+function connect(raw) {
+  const name = String(raw || '').trim().replace(/^@/, '');
+  if (!USERNAME_RE.test(name)) { toast('Roblox usernames are 3–20 letters, numbers or underscores.'); return null; }
+  state.link = { communities: [], ...(state.link || {}), username: name };
+  state.prefs = { ...state.prefs, welcomed: true };
+  persist();
+  refreshPlayer(true);
+  return name;
+}
+function disconnect() {
+  state.link = null; state.player = null; state.playerAt = 0; state.playerError = false;
+  persist(); render();
+}
+function openAccount() {
+  const linked = !!state.link;
+  openSheet(`<form class="stack" id="acctForm" novalidate>
+      <div class="grabber"></div>
+      <h2>${linked ? 'Roblox account' : 'Connect Roblox'}</h2>
+      <p class="fine">RoHub reads your public Roblox profile: your games, players and visits. It never asks for your Roblox password.</p>
+      <div class="field"><label for="acctUser">Roblox username</label><input id="acctUser" value="${esc(state.link?.username || '')}" placeholder="builderman" autocomplete="off" autocapitalize="off" spellcheck="false"></div>
+      <div class="actions">
+        ${linked ? '<button type="button" class="btn danger" id="discBtn">Disconnect</button>' : ''}
+        <div class="right"><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">${linked ? 'Save' : 'Connect'}</button></div>
+      </div>
+    </form>`, () => {
+    if (!linked) setTimeout(() => $('#acctUser')?.focus(), 50);
+    $('#acctForm').onsubmit = e => {
+      e.preventDefault();
+      const name = connect($('#acctUser').value);
+      if (name) { closeSheet(); toast(`Connected as @${name}`); }
+    };
+    const disc = $('#discBtn');
+    if (disc) armed(disc, 'Tap again to disconnect', () => { disconnect(); closeSheet(); toast('Roblox disconnected'); });
+  });
+}
+function saveCommunities(list) {
+  state.link = { ...state.link, communities: list };
+  persist();
+  refreshPlayer(true);
+}
+function openCommunities() {
+  if (!state.link) { openAccount(); return; }
+  const p = rbxStatus() === 'ok' ? state.player : null;
+  const list = state.link.communities || [];
+  const found = x => (p?.communities || []).find(c => c.id && sameName(c.input, x));
+  const knownName = x => (state.player?.suggested || []).find(s => sameName(s.id, x))?.name;
+  const picks = (p?.suggested || []).filter(s => !list.some(x => sameName(x, s.id)));
+  openSheet(`<form class="stack" id="commForm" novalidate>
+      <div class="grabber"></div>
+      <h2>Your communities</h2>
+      <p class="fine">Add the Roblox communities (groups) you publish games under. Paste the community’s link, its ID or its exact name. Communities you own are added automatically when they have public games.</p>
+      <div class="connect"><input id="commIn" placeholder="Link, ID or exact name" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Community link, ID or name"><button class="btn primary" type="submit">Add</button></div>
+      ${picks.length ? `<div class="sec"><h3>Where you have a role</h3><div class="meta">${picks.map(s => `<button type="button" class="chip pick" data-pick="${s.id}">${esc(s.name)}${s.role ? ` · ${esc(s.role)}` : ''}</button>`).join('')}</div></div>` : ''}
+      ${list.length ? `<div class="sec"><h3>Added</h3><div class="list">${list.map((x, i) => {
+        const c = found(x);
+        return `<div class="row"><div class="body"><div class="t">${esc(c ? c.name : knownName(x) || x)}</div><span class="sub">${c ? `${plural(c.games || 0, 'public game')} · ${fmt(c.memberCount)} members` : 'Looking it up…'}</span></div><button type="button" class="mini" data-remove="${i}">Remove</button></div>`;
+      }).join('')}</div></div>` : ''}
+      <div class="actions"><div class="right"><button type="button" class="btn" data-close>Done</button></div></div>
+    </form>`, sheet => {
+    const add = v => {
+      v = String(v || '').trim();
+      if (!v) return;
+      if (list.length >= 8) { toast('You can add up to 8 communities.'); return; }
+      if (list.some(x => sameName(x, v))) { toast('That community is already added.'); return; }
+      saveCommunities([...list, v]); toast('Added'); openCommunities();
+    };
+    $('#commForm').onsubmit = e => { e.preventDefault(); add($('#commIn').value); };
+    sheet.querySelectorAll('[data-pick]').forEach(b => { b.onclick = () => add(b.dataset.pick); });
+    sheet.querySelectorAll('[data-remove]').forEach(b => {
+      b.onclick = () => { saveCommunities(list.filter((_, i) => i !== +b.dataset.remove)); toast('Removed'); openCommunities(); };
+    });
+  }, 'communities');
+}
+
+/* ---------- settings: install, backup, restore ---------- */
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isInstalled = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+function openSettings() {
+  openSheet(`<div class="stack">
+      <div class="grabber"></div>
+      <h2>Settings</h2>
+      <div class="list">
+        <button type="button" class="row" data-go="account"><div class="body"><div class="t">Roblox account</div><span class="sub">${state.link ? '@' + esc(state.link.username) : 'Not connected'}</span></div><span class="chev">›</span></button>
+        <button type="button" class="row" data-go="communities"><div class="body"><div class="t">Your communities</div><span class="sub">${plural((state.link?.communities || []).length, 'community').replace('communitys', 'communities')} added</span></div><span class="chev">›</span></button>
+      </div>
+      ${isInstalled() ? '' : `<div class="sec"><h3>Use it like an app</h3><p class="about">${isIOS() ? 'In Safari, tap Share, then Add to Home Screen.' : 'In your browser’s menu, choose Install app or Add to Home screen.'}</p></div>`}
+      <div class="sec"><h3>Your data</h3>
+        <p class="fine">Ideas, tasks and your numbers are saved only on this device. Download a backup to move them to another device.</p>
+        <div class="meta"><button type="button" class="btn" id="backupBtn">Download backup</button><label class="btn" for="restoreIn">Restore backup</label><input type="file" id="restoreIn" accept="application/json,.json" hidden></div>
+        <div id="restoreBox"></div>
+      </div>
+      <div class="sec"><h3>About RoHub</h3><p class="fine">Trending updates every 30 minutes from Roblox’s charts. Your games load live from Roblox through RoProxy. RoHub isn’t made by or affiliated with Roblox.</p></div>
+      <div class="actions"><button type="button" class="btn danger" id="resetBtn">Erase RoHub data</button><div class="right"><button type="button" class="btn primary" data-close>Done</button></div></div>
+    </div>`, sheet => {
+    sheet.querySelectorAll('[data-go]').forEach(b => { b.onclick = () => (b.dataset.go === 'account' ? openAccount() : openCommunities()); });
+    $('#backupBtn').onclick = () => {
+      const blob = new Blob([JSON.stringify({ app: 'RoHub', version: 1, exportedAt: Date.now(), items: state.items, link: state.link, prefs: state.prefs }, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `rohub-backup-${today()}.json`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    };
+    $('#restoreIn').onchange = async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      let data = null;
+      try { data = JSON.parse(await file.text()); } catch {}
+      if (!data || data.app !== 'RoHub' || !Array.isArray(data.items)) { toast('That file isn’t a RoHub backup.'); return; }
+      $('#restoreBox').innerHTML = `<div class="banner">This replaces everything on this device with the backup from <b>${shortDate(data.exportedAt)}</b> (${plural(data.items.length, 'item')}).</div>
+        <div class="meta"><button type="button" class="btn danger" id="doRestore">Replace my data</button></div>`;
+      armed($('#doRestore'), 'Tap again to replace', () => {
+        state.items = data.items; state.link = data.link || null; state.prefs = { ...(data.prefs || {}), welcomed: true };
+        state.player = null; state.playerAt = 0;
+        persist(); closeSheet(); render(); refreshPlayer(true); toast('Backup restored');
+      });
+    };
+    armed($('#resetBtn'), 'Tap again to erase', () => {
+      try { localStorage.removeItem(STORE_KEY); } catch {}
+      Object.assign(state, { items: [], link: null, player: null, playerAt: 0, prefs: {}, welcomeDone: false });
+      closeSheet(); render(); toast('RoHub data erased');
+    });
+  });
+}
+
+/* ---------- welcome ---------- */
+function burst(el) {
+  if (!el || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const r = el.getBoundingClientRect(), colors = ['--ok', '--warn', '--glow-text', '--pink', '--fg'];
+  for (let i = 0; i < 30; i++) {
+    const s = document.createElement('span'), a = Math.random() * Math.PI * 2, d = 70 + Math.random() * 110;
+    s.className = 'spark';
+    s.style.cssText = `left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;--dx:${Math.round(Math.cos(a) * d)}px;--dy:${Math.round(Math.sin(a) * d - 40)}px;background:var(${colors[i % colors.length]})`;
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1200);
+  }
+}
+function maybeWelcome() {
+  if (!state.prefs.welcomed && !state.link && !state.welcomeDone && !state.welcomeOpen) openWelcome();
+}
+function openWelcome() {
+  state.welcomeOpen = true;
+  const close = () => {
+    state.welcomeOpen = false; state.welcomeDone = true;
+    state.prefs = { ...state.prefs, welcomed: true }; persist();
+    $('#welcomeRoot').innerHTML = '';
+  };
+  // Floating blocks start mid-flight (negative delays) so the background is already alive on the first frame.
+  const blocks = Array.from({ length: 14 }, () => `<span class="block" style="--x:${(Math.random() * 100).toFixed(1)}%;--size:${Math.round(14 + Math.random() * 34)}px;--dur:${Math.round(14 + Math.random() * 16)}s;--delay:-${(Math.random() * 30).toFixed(1)}s;--rot:${Math.round(Math.random() * 360 - 180)}deg"></span>`).join('');
+  const installTip = isIOS() && !isInstalled() ? `<div class="step reveal" style="--i:4"><div class="step-row"><span class="badge">★</span><div class="txt"><b>Use it like an app</b><span>In Safari, tap Share, then Add to Home Screen.</span></div></div></div>` : '';
+  $('#welcomeRoot').innerHTML = `<div class="welcome" role="dialog" aria-modal="true" aria-labelledby="wTitle">
+    <div class="welcome-bg" aria-hidden="true"><div class="aurora a1"></div><div class="aurora a2"></div><div class="aurora a3"></div>${blocks}</div>
+    <div class="welcome-in">
+      <div class="reveal" style="--i:0"><div class="logo">${icon('<path d="M4 9.5 12 4l8 5.5v9L12 20l-8-1.5z"/><path d="M12 4v16M4 9.5l8 2 8-2"/>', 34)}</div></div>
+      <div class="reveal" style="--i:1"><h2 id="wTitle">Welcome to RoHub</h2></div>
+      <p class="lead reveal" style="--i:2">Your Roblox ideas, tasks, games and what’s trending, all in one place. No account needed.</p>
+      <div class="step reveal" style="--i:3" id="wStep">
+        <div class="step-row"><span class="badge">1</span><div class="txt"><b>Connect your Roblox account</b><span>See all your games with icons, players and visits. You can add your communities later.</span></div></div>
+        <form class="connect" id="wForm" novalidate>
+          <input id="wUser" placeholder="Roblox username" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Roblox username">
+          <button class="btn primary" type="submit">Connect</button>
+        </form>
+        <p class="fine">RoHub only reads your public Roblox profile. It never asks for your Roblox password.</p>
+      </div>
+      ${installTip}
+      <button class="linkbtn reveal" style="--i:5" id="wSkip">Skip for now</button>
+    </div></div>`;
+  $('#wForm').onsubmit = e => {
+    e.preventDefault();
+    const name = connect($('#wUser').value);
+    if (!name) return;
+    $('#wStep').innerHTML = `<div class="step-row"><span class="badge done" aria-label="Done"></span><div class="txt"><b>Connected as @${esc(name)}</b><span>Your games are loading in My games.</span></div></div>`;
+    $('#wSkip').outerHTML = '<button class="btn primary" id="wGo">Start using RoHub</button>';
+    $('#wGo').onclick = () => { close(); state.tab = 'games'; render(); };
+    burst($('#wStep'));
+  };
+  $('#wSkip').onclick = close;
+}
+
+/* ---------- events ---------- */
+$('#tabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if (!b) return;
+  state.tab = b.dataset.tab;
+  try { history.replaceState(null, '', '#' + state.tab); } catch {}
+  window.scrollTo(0, 0);
+  render();
+  if (state.tab === 'games') refreshPlayer(false);
+});
+$('#main').addEventListener('click', e => {
+  const tog = e.target.closest('[data-toggle]');
+  if (tog) {
+    e.stopPropagation();
+    const t = state.items.find(i => i.id === tog.dataset.toggle);
+    if (t) saveItem({ ...t, done: tog.checked, updatedAt: Date.now() });
+    return;
+  }
+  const act = e.target.closest('[data-act]')?.dataset.act;
+  if (act === 'account') { openAccount(); return; }
+  if (act === 'communities') { openCommunities(); return; }
+  if (act === 'refresh') { refreshPlayer(true); return; }
+  if (act === 'trending') { loadTrending(); return; }
+  const tr = e.target.closest('[data-trend]');
+  if (tr) {
+    const g = (state.trending?.games || []).find(x => x.id === tr.dataset.trend);
+    if (g) openTrend(g);
+    return;
+  }
+  const own = e.target.closest('[data-own]');
+  if (own) {
+    const g = connectedGames().find(x => x.key === own.dataset.own);
+    if (g) openOwn(g);
+    return;
+  }
+  const row = e.target.closest('[data-edit]');
+  const item = row && state.items.find(i => i.id === row.dataset.edit);
+  if (item) openForm(item.kind, item);
+});
+$('#fab').onclick = () => { const kind = TABS.find(t => t.id === state.tab).kind; if (kind) openForm(kind); };
+$('#settingsBtn').onclick = openSettings;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { loadTrending(); refreshPlayer(false); } });
+
+/* ---------- start ---------- */
+load();
+const startTab = location.hash.slice(1);
+if (TABS.some(t => t.id === startTab)) state.tab = startTab;
+render();
+loadTrending();
+refreshPlayer(false);
+setInterval(() => { loadTrending(); refreshPlayer(false); }, 15 * 60 * 1000);
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
