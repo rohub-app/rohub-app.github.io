@@ -41,28 +41,6 @@ jobs:
       - id: deploy
         uses: actions/deploy-pages@v4
 
-      # Phone alerts about your own games through ntfy (optional, see scripts/watch_games.py).
-      # The last numbers carry over between runs in the Actions cache, not in the repository.
-      - uses: actions/cache/restore@v4
-        with:
-          path: .watch
-          key: watch-${{ github.run_id }}
-          restore-keys: watch-
-
-      - name: Phone alerts for your games
-        continue-on-error: true
-        env:
-          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-          WATCH_USERNAME: ${{ vars.WATCH_USERNAME }}
-          WATCH_COMMUNITIES: ${{ vars.WATCH_COMMUNITIES }}
-        run: python3 scripts/watch_games.py .watch/state.json
-
-      - uses: actions/cache/save@v4
-        if: hashFiles('.watch/state.json') != ''
-        with:
-          path: .watch
-          key: watch-${{ github.run_id }}
-
       # GitHub pauses scheduled jobs in repositories without commits for 60 days.
       # A tiny commit once a day keeps the 30-minute sync running.
       - name: Keep the schedule active

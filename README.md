@@ -12,7 +12,6 @@ Your Roblox ideas, tasks, games and what's trending, all in one place. Works on 
 | `scripts/build_trending.py` | Builds the Trending tab from Roblox's charts |
 | `.github/workflows/sync.yml` | Runs that every 30 minutes on GitHub and publishes the site |
 | `scripts/make_icons.py` | Draws the app icons |
-| `scripts/watch_games.py` | Sends phone alerts about your own games (see below) |
 | `promo/` | Makes RoHub's TikTok videos: voiceover, original music, sound effects and app screens |
 
 ## Put it online (free, about 5 minutes)
@@ -46,16 +45,6 @@ Open the link in Safari, tap **Share**, then **Add to Home Screen**. RoHub opens
 - **RoHub counts visitors anonymously.** Each browser session adds one visit, and each phone or computer adds one device the first time it opens RoHub. The welcome screen also asks where people heard about RoHub. All of these are anonymous tallies kept by [Abacus](https://abacus.jasoncameron.dev), a free counting service: no username or other personal data is sent, and copies running on localhost don't count. See them in **Settings → RoHub stats**, or open the site with `#stats` at the end of the link.
 - **RoHub used to live at `creatorluisrobiz-dot.github.io/rohub`.** That link still works: it forwards here and brings each device's ideas, tasks and Roblox link along. If you added the old one to your Home Screen, add the new link again.
 - RoHub isn't made by or affiliated with Roblox.
-
-## Phone alerts for your games
-
-Every 30 minutes, GitHub checks your own games and sends a notification through [ntfy](https://ntfy.sh), a free app with no account. You get one when a game passes a visits or favorites milestone, sets a new record for players at once, shows up on Roblox's charts, or when a new game appears.
-
-1. Install **ntfy** on your phone and subscribe to a private topic name, like `rohub-` followed by random letters.
-2. In this repository, go to **Settings → Secrets and variables → Actions**. Add a secret `NTFY_TOPIC` with that topic name.
-3. On the **Variables** tab, add `WATCH_USERNAME` with your Roblox username. Optionally add `WATCH_COMMUNITIES` with the IDs of communities you publish under, separated by commas.
-
-The first run sends "RoHub alerts are on". To stop the alerts, delete the `NTFY_TOPIC` secret. Anyone who knows the topic name can read the alerts, so keep it private.
 
 ## Make the TikTok videos
 
