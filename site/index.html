@@ -280,6 +280,34 @@ a.mini { text-decoration: none; display: inline-flex; align-items: center; }
 @keyframes blink { 0%, 100% { opacity: .3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
 @media (prefers-reduced-motion: reduce) { .thinking i { animation: none; } }
 
+.top-btns { display: flex; gap: 8px; }
+.iconbtn { position: relative; }
+.badge { position: absolute; top: 7px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--bad); box-shadow: 0 0 0 2px var(--raised); }
+.daily { border-radius: var(--r); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+  background: radial-gradient(120% 150% at 0% 0%, color-mix(in srgb, var(--glow1) 30%, transparent), transparent 60%), radial-gradient(120% 150% at 100% 100%, color-mix(in srgb, var(--glow3) 22%, transparent), transparent 60%), var(--surface); }
+.daily .row { padding: 0; }
+.daily-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.eyebrow { font-size: 13px; font-weight: 800; color: var(--glow-text); }
+.tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tool { appearance: none; border: 0; margin: 0; background: var(--surface); color: var(--fg); font: inherit; text-align: left; border-radius: var(--r); padding: 12px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; cursor: pointer; min-width: 0; }
+.tool:active { transform: scale(.97); }
+.tool .em { font-size: 22px; line-height: 1.2; }
+.tool b { font-size: 14px; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+.tool span:last-child { font-size: 12px; font-weight: 600; color: var(--muted); line-height: 1.3; }
+label.row { cursor: pointer; align-items: center; }
+.result { background: var(--raised); border-radius: 14px; padding: 12px 14px; color: var(--muted); font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.result b { color: var(--fg); }
+.price { flex: none; font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.row.pass { align-items: center; }
+.it-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 10px; background: var(--bg); border-radius: 16px; padding: 12px; }
+.it-tile { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.it-tile img, .it-empty { display: block; width: 100%; aspect-ratio: 1; border-radius: 14px; object-fit: cover; background: var(--raised); box-sizing: border-box; }
+.it-empty { display: grid; place-items: center; text-align: center; padding: 6px; color: var(--muted); font-size: 12px; font-weight: 700; border: 2px dashed var(--line); }
+.it-tile b { font-size: 12px; font-weight: 800; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.it-tile span { font-size: 11px; font-weight: 700; color: var(--muted); }
+.qr { align-self: center; width: 220px; height: 220px; border-radius: 18px; background: #fff; }
+.linkbox { align-self: center; font-size: 17px; font-weight: 800; }
+
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); background: var(--raised); color: var(--fg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 700; z-index: 30; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0, 0, 0, .6); }
 </style>
 </head>
@@ -289,7 +317,10 @@ a.mini { text-decoration: none; display: inline-flex; align-items: center; }
   <header>
     <div class="top">
       <span class="app">RoHub</span>
-      <button class="iconbtn" id="settingsBtn" aria-label="Settings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+      <div class="top-btns">
+        <button class="iconbtn" id="newsBtn" aria-label="News"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"/><path d="M10 20a2.2 2.2 0 0 0 4 0"/></svg><i class="badge" hidden></i></button>
+        <button class="iconbtn" id="settingsBtn" aria-label="Settings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button>
+      </div>
     </div>
     <h1 id="title">Ideas</h1>
     <p class="subtitle" id="subtitle"></p>
@@ -372,7 +403,7 @@ const COUNTER = 'https://abacus.jasoncameron.dev';
 const COUNTER_NS = 'rohub-creatorluisrobiz';
 
 const state = { tab: 'ideas', items: [], link: null, player: null, playerAt: 0, prefs: {}, trending: null, trendingError: false, loadingPlayer: false, playerError: false, welcomeOpen: false, welcomeDone: false,
-  search: { q: '', results: [], next: null, loading: false, error: false, token: 0 }, bankGenre: 'All', bankPage: 0 };
+  search: { q: '', results: [], next: null, loading: false, error: false, token: 0 }, bankGenre: 'All', bankPage: 0, taskGame: 'All' };
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -431,12 +462,12 @@ function load() {
     state.prefs = d.prefs || {};
   } catch {}
 }
-function persist() {
+function persist(quiet) {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify({ items: state.items, link: state.link, player: state.player, playerAt: state.playerAt, prefs: state.prefs }));
     return true;
   } catch {
-    toast('Couldn’t save on this device. Check that your browser allows website data.');
+    if (!quiet) toast('Couldn’t save on this device. Check that your browser allows website data.');
     return false;
   }
 }
@@ -567,6 +598,7 @@ async function refreshPlayer(force) {
     if (state.link === link) { state.player = next; state.playerAt = Date.now(); persist(); }
   } catch { state.playerError = true; }
   state.loadingPlayer = false; render();
+  rollNews();
   if (sheetName === 'communities') openCommunities();
 }
 
@@ -579,6 +611,7 @@ async function loadTrending() {
     state.trendingError = false;
   } catch { state.trendingError = !state.trending; }
   render();
+  rollNews();
 }
 
 /* ---------- derived data ---------- */
@@ -689,10 +722,37 @@ function renderBank() {
     <button class="btn ai-btn" data-act="ai-new">✨ Get fresh ideas from AI</button>`;
 }
 
+// Idea of the day: the same idea for everyone on a given day, cycling through the whole bank.
+const localDay = (ms = Date.now()) => { const d = new Date(ms); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+const dailyIdea = () => IDEA_BANK[(Math.floor(Date.parse(localDay() + 'T00:00:00Z') / 864e5) * 7) % IDEA_BANK.length];
+// A streak counts the days in a row RoHub was opened.
+function bumpStreak() {
+  const s = state.prefs.streak || {}, t = localDay();
+  if (s.last === t) return;
+  const n = s.last === localDay(Date.now() - 864e5) ? (s.n || 1) + 1 : 1;
+  state.prefs = { ...state.prefs, streak: { last: t, n, best: Math.max(n, s.best || 0) } };
+  persist(true);
+}
+function dailyCard() {
+  const b = dailyIdea(), added = byKind('idea').some(x => sameName(x.title, b.t)), n = state.prefs.streak?.n || 1;
+  return `<div class="daily">
+    <div class="daily-top"><span class="eyebrow">💡 Idea of the day</span>${n > 1 ? `<span class="chip hot">🔥 ${n}-day streak</span>` : ''}</div>
+    <div class="row">
+      <span class="em" aria-hidden="true">${b.e}</span>
+      <div class="body">
+        <div class="t">${esc(b.t)}</div>
+        <div class="pitch">${esc(b.p)}</div>
+        <div class="meta"><span class="chip">${esc(b.g)}</span><button class="mini push" data-bank="${IDEA_BANK.indexOf(b)}" ${added ? 'disabled' : ''}>${added ? 'Added ✓' : '+ Add'}</button></div>
+      </div>
+    </div>
+    <p class="fine">${n > 1 ? 'Come back tomorrow to keep your streak going.' : 'A new idea every day. Come back tomorrow to start a streak.'}</p>
+  </div>`;
+}
+
 function renderIdeas() {
   const list = byKind('idea').sort((a, b) => (b.hot ? 1 : 0) - (a.hot ? 1 : 0) || (b.createdAt || 0) - (a.createdAt || 0));
-  if (!list.length) return empty('No ideas yet', 'Tap + to write one down, or add one of these.') + renderBank();
-  return `<div class="list">${list.map(i => `
+  if (!list.length) return dailyCard() + empty('No ideas yet', 'Tap + to write one down, or add one of these.') + renderBank();
+  return dailyCard() + `<div class="list">${list.map(i => `
     <div class="row" data-edit="${i.id}">
       <div class="body">
         <div class="t">${esc(i.title)}</div>
@@ -725,16 +785,30 @@ const aiCard = () => `<div class="cta ai">
     <div class="txt"><b>✨ Need ideas for your game?</b><span>Pick one of your games, say what it’s about, and the AI suggests ideas you can add as tasks.</span></div>
     <button class="btn primary" data-act="ai">Ask AI</button>
   </div>`;
+const checklistBtn = '<button class="mini" data-act="checklists">📋 Add a checklist</button>';
 function renderTasks() {
-  const all = byKind('task');
-  if (!all.length) return aiCard() + empty('Nothing to do yet', 'Tap + to add a task, like “Redesign lobby UI”.');
+  const everything = byKind('task');
+  if (!everything.length) return aiCard() + `<div class="bank-h"><div class="group-h">To do</div>${checklistBtn}</div>` + empty('Nothing to do yet', 'Tap + to add a task, or add a ready-made checklist.');
+  // One chip per game the tasks are filed under ('' = tasks without a game).
+  const games = [];
+  everything.forEach(t => { const g = t.game || ''; const hit = games.find(x => sameName(x.name, g)); if (hit) hit.n++; else games.push({ name: g, n: 1 }); });
+  games.sort((a, b) => (a.name === '') - (b.name === '') || b.n - a.n);
+  if (state.taskGame !== 'All' && !games.some(x => sameName(x.name, state.taskGame))) state.taskGame = 'All';
+  const pick = state.taskGame;
+  const all = pick === 'All' ? everything : everything.filter(t => sameName(t.game || '', pick));
   const pr = { High: 0, Normal: 1, Low: 2 };
   const open = all.filter(t => !t.done).sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999') || (pr[a.priority] ?? 1) - (pr[b.priority] ?? 1));
   const done = all.filter(t => t.done).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-  return aiCard() + `
-    <div class="group-h">To do</div>
+  const chip = (value, label) => `<button class="chip pick" data-tgame="${esc(value)}" aria-pressed="${value === pick || (value !== 'All' && pick !== 'All' && sameName(value, pick))}">${esc(label)}</button>`;
+  const chips = games.length > 1 || (games.length === 1 && games[0].name) ? `<div class="chips" role="group" aria-label="Filter tasks by game">${chip('All', 'All games')}${games.map(g => chip(g.name, `${g.name || 'No game'} · ${g.n}`)).join('')}</div>` : '';
+  const team = pick !== 'All' && pick ? `<div class="cta">
+      <div class="txt"><b>👥 Building ${esc(pick)} with friends?</b><span>Send them these tasks as a link. When they send theirs back, RoHub keeps the newest version of each task.</span></div>
+      <button class="btn" data-act="team">Share tasks</button>
+    </div>` : '';
+  return aiCard() + chips + `
+    <div class="bank-h"><div class="group-h">To do</div>${checklistBtn}</div>
     ${open.length ? `<div class="list">${open.map(taskRow).join('')}</div>` : '<div class="banner">All caught up.</div>'}
-    ${done.length ? `<div class="group-h">Done</div><div class="list">${done.map(taskRow).join('')}</div>` : ''}`;
+    ${done.length ? `<div class="group-h">Done</div><div class="list">${done.map(taskRow).join('')}</div>` : ''}` + team;
 }
 
 function statusChip(s) {
@@ -769,6 +843,11 @@ const ownTile = g => `
         <div class="tmeta">${g.ccu ? fmt(g.ccu) + ' playing' : stat(g.visits) + ' visits'}</div>
       </button>`;
 
+const toolsRow = () => `<div class="tools">
+    <button class="tool" data-act="icon-test"><span class="em" aria-hidden="true">🖼️</span><b>Icon tester</b><span>See it next to top games</span></button>
+    <button class="tool" data-act="robux"><span class="em" aria-hidden="true">💰</span><b>Robux calculator</b><span>Sales, DevEx and ads</span></button>
+    <button class="tool" data-act="passes"><span class="em" aria-hidden="true">🏷️</span><b>Pass prices</b><span>What top games charge</span></button>
+  </div>`;
 function renderGames() {
   const st = rbxStatus();
   const manual = manualGames().sort((a, b) => (b.released || '').localeCompare(a.released || '') || (b.createdAt || 0) - (a.createdAt || 0));
@@ -800,6 +879,7 @@ function renderGames() {
       </div>
     </div>`;
     if (state.playerError) html += '<div class="banner">Couldn’t refresh from Roblox just now, so these numbers may be a little old.</div>';
+    html += toolsRow();
     html += statTiles([['Ad credits spent', fmt(sum('adCredits'))], ['Robux earned', fmt(sum('robux'))]]);
     const onProfile = linked.filter(g => g.source !== 'community');
     const comms = (p.communities || []).filter(c => c.id);
@@ -817,6 +897,7 @@ function renderGames() {
     return html;
   }
   const sum = k => manual.reduce((acc, g) => acc + num(g[k]), 0);
+  html += toolsRow();
   html += statTiles([['Total visits', fmt(sum('visits'))], ['Best peak CCU', fmt(Math.max(0, ...manual.map(g => num(g.peakCcu))))], ['Ad credits spent', fmt(sum('adCredits'))], ['Robux earned', fmt(sum('robux'))]]);
   html += manual.length ? manualRows(manual) : empty('No games logged yet', 'Tap + to add a game you’ve made, with its CCU, visits and ad spend.');
   return html;
@@ -861,6 +942,7 @@ function render() {
   $('#searchForm').hidden = state.tab !== 'trending';
   $('#main').innerHTML = { ideas: renderIdeas, tasks: renderTasks, games: renderGames, trending: renderTrending }[state.tab]();
   $('#fab').classList.toggle('ghost', state.tab === 'trending');
+  newsBadge();
   maybeWelcome();
 }
 
@@ -883,9 +965,9 @@ function armed(btn, label, run) {
   };
 }
 
-function openForm(kind, item) {
+function openForm(kind, item, pre) {
   const s = SCHEMA[kind];
-  const v = item || {};
+  const v = item || pre || {};
   const field = f => {
     const id = 'f_' + f.k, val = v[f.k] ?? '';
     let input;
@@ -954,9 +1036,10 @@ function openTrend(g) {
       ${change}
       ${bullets('Why it’s trending', g.why)}
       ${bullets('What you could borrow', g.tips)}
+      ${passBox(g.universeId)}
       ${g.about ? `<div class="sec"><h3>About the game</h3><p class="about">${esc(g.about)}</p></div>` : ''}
       <div class="actions">${robloxLink(g)}<div class="right"><button class="btn primary" data-close>Done</button></div></div>
-    </div>`);
+    </div>`, fillPasses);
 }
 
 function openOwn(g) {
@@ -966,11 +1049,13 @@ function openOwn(g) {
       <div class="grabber"></div>
       ${gameHead(g, `<span class="chip ok">${g.communityName ? esc(g.communityName) : 'On Roblox'}</span>${g.genre ? `<span class="chip">${esc(g.genre)}</span>` : ''}`)}
       ${statsGrid(g)}
+      ${passBox(g.universeId)}
       <div class="sec"><h3>Your numbers</h3><p class="fine">Saved only on this device. Roblox doesn’t share Robux or ad spend publicly, so add them from your Creator Dashboard.</p></div>
       <div class="grid3">${numField('x_peak', 'Peak CCU', ex.peakCcu)}${numField('x_ads', 'Ad credits', ex.adCredits)}${numField('x_robux', 'Robux', ex.robux)}</div>
       <div class="field"><label for="x_notes">Notes</label><textarea id="x_notes" placeholder="What worked, what to try next…">${esc(ex.notes || '')}</textarea></div>
       <div class="actions">${robloxLink(g)}<div class="right"><button type="button" class="btn" data-close>Close</button><button type="submit" class="btn primary">Save</button></div></div>
-    </form>`, () => {
+    </form>`, sheet => {
+    fillPasses(sheet);
     $('#ownForm').onsubmit = e => {
       e.preventDefault();
       const val = id => { const v = $('#' + id).value; return v === '' ? null : Number(v); };
@@ -1025,12 +1110,14 @@ function openFound(g) {
       ${gameHead(d, d.genre ? `<span class="chip">${esc(d.genre)}</span>` : '')}
       ${statsGrid(d)}
       ${loading ? '<p class="fine">Loading details from Roblox…</p>' : ''}
+      ${passBox(d.universeId)}
       ${d.about ? `<div class="sec"><h3>About the game</h3><p class="about">${esc(d.about)}</p></div>` : ''}
       <div class="cta ai"><div class="txt"><b>✨ Borrow from this game</b><span>The AI suggests ideas inspired by it for your own game.</span></div><button class="btn primary" data-ai>Get ideas</button></div>
       <div class="actions">${robloxLink(d)}<div class="right"><button class="btn" data-close>Done</button></div></div>
     </div>`;
     sheet.querySelectorAll('[data-close]').forEach(b => { b.onclick = closeSheet; });
     sheet.querySelector('[data-ai]').onclick = () => openHelper({ inspo: d });
+    fillPasses(sheet);
   };
   openSheet('', sheet => fill(sheet, true), name);
   const refill = () => { if (sheetName === name) fill($('#sheetRoot .sheet'), false); };
@@ -1148,6 +1235,328 @@ function openHelper(pre = {}) {
   }, 'helper');
 }
 
+/* ---------- checklists ---------- */
+const CHECKLISTS = [
+  { id: 'launch', e: '🚀', t: 'Launch a new game', tasks: ['Make an icon that stands out (try the icon tester)', 'Make 2–3 thumbnails that show real gameplay', 'Write a title with a hook and 1–2 emojis',
+    'Write a description: what to do, controls and update news', 'Fill in the content maturity questionnaire', 'Add badges for the first win and big milestones',
+    'Add 2–3 game passes, like VIP or 2x coins', 'Test on phone, tablet and console', 'Set up a community (group) and a Discord', 'Post a short TikTok of the best moment', 'Plan the first update for week one'] },
+  { id: 'update', e: '🛠️', t: 'Big update', tasks: ['Pick the one main new feature', 'Fix the bugs players report most', 'Add an update tag to the title, like [🆕 UPDATE]',
+    'Make a new thumbnail for the update', 'Write the update notes in the description', 'Post a teaser in your community or Discord', 'Test on phone before publishing'] },
+  { id: 'ads', e: '📣', t: 'Before running ads', tasks: ['Make sure the first minute is fun and clear', 'Check your icon in the icon tester', 'Set a daily budget in Ads Manager',
+    'Write down your visits before the ads start', 'Compare visits after 3 days in the Robux calculator'] },
+  { id: 'event', e: '🎃', t: 'Seasonal event', tasks: ['Pick the theme, like Halloween or Christmas', 'Add a limited-time item or pet', 'Decorate the lobby', 'Add a countdown timer for the event', 'Add the event to your title and icon'] },
+];
+// Games to file tasks under: your Roblox games, games you logged, and games already used on tasks.
+function taskGameNames() {
+  const names = [...helperGames().map(g => g.name), ...byKind('task').map(t => t.game).filter(Boolean)];
+  return names.filter((n, i) => names.findIndex(m => sameName(m, n)) === i);
+}
+function openChecklists() {
+  const games = taskGameNames(), first = state.taskGame !== 'All' ? state.taskGame : (games[0] || '');
+  let pick = CHECKLISTS[0];
+  openSheet(`<form class="stack" id="clForm" novalidate>
+      <div class="grabber"></div>
+      <h2>📋 Checklists</h2>
+      <p class="fine">Add a ready-made list of tasks to one of your games. Untick anything you’ve already done.</p>
+      <div class="chips" role="group" aria-label="Checklists">${CHECKLISTS.map(c => `<button type="button" class="chip pick" data-cl="${c.id}">${c.e} ${esc(c.t)}</button>`).join('')}</div>
+      <div class="field"><label for="cl_game">For which game?</label><select id="cl_game">${games.map(n => `<option ${sameName(n, first) ? 'selected' : ''}>${esc(n)}</option>`).join('')}<option value="" ${first ? '' : 'selected'}>No game</option></select></div>
+      <div class="list" id="cl_list"></div>
+      <div class="actions"><div class="right"><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary" id="cl_go">Add tasks</button></div></div>
+    </form>`, sheet => {
+    const form = sheet.querySelector('#clForm'), list = form.querySelector('#cl_list'), go = form.querySelector('#cl_go');
+    const count = () => { const n = list.querySelectorAll('input:checked').length; go.textContent = n ? `Add ${plural(n, 'task')}` : 'Add tasks'; go.disabled = !n; };
+    const draw = () => {
+      form.querySelectorAll('[data-cl]').forEach(b => b.setAttribute('aria-pressed', b.dataset.cl === pick.id));
+      list.innerHTML = pick.tasks.map((t, i) => `<label class="row"><input type="checkbox" class="check" data-i="${i}" checked><div class="body"><div class="t">${esc(t)}</div></div></label>`).join('');
+      count();
+    };
+    form.querySelectorAll('[data-cl]').forEach(b => { b.onclick = () => { pick = CHECKLISTS.find(c => c.id === b.dataset.cl); draw(); }; });
+    list.onchange = count;
+    draw();
+    form.onsubmit = e => {
+      e.preventDefault();
+      const game = form.querySelector('#cl_game').value, now = Date.now();
+      const chosen = [...list.querySelectorAll('input:checked')].map(c => pick.tasks[+c.dataset.i]);
+      if (!chosen.length) return;
+      chosen.forEach((title, i) => state.items.push({ id: 'i' + (now + i).toString(36) + Math.random().toString(36).slice(2, 6), kind: 'task', title, game, priority: 'Normal', done: false, createdAt: now + i, updatedAt: now + i }));
+      persist(); closeSheet(); state.taskGame = game || 'All'; render(); toast(`Added ${plural(chosen.length, 'task')}`);
+    };
+  }, 'checklists');
+}
+
+/* ---------- game pass prices ---------- */
+const passCache = new Map();
+function gamePasses(universeId) {
+  const id = String(universeId);
+  if (!passCache.has(id)) {
+    passCache.set(id, getJSON(`${RP.apis}/game-passes/v1/universes/${id}/game-passes?passView=Full&pageSize=100`)
+      .then(res => (res.gamePasses || []).filter(p => p.isForSale && p.price > 0).map(p => ({ name: p.displayName || p.name || 'Game pass', price: p.price })).sort((a, b) => a.price - b.price))
+      .catch(e => { passCache.delete(id); throw e; }));
+  }
+  return passCache.get(id);
+}
+const median = list => { const s = list.slice().sort((a, b) => a - b), m = s.length >> 1; return s.length ? (s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2)) : 0; };
+const full = n => Math.round(num(n)).toLocaleString('en-US');
+const passWord = n => `${n} ${n === 1 ? 'pass' : 'passes'}`;
+const passBox = id => id ? `<div class="sec" data-passes="${esc(id)}"><h3>Game passes</h3><p class="fine">Loading prices…</p></div>` : '';
+async function fillPasses(sheet) {
+  const box = sheet && sheet.querySelector('[data-passes]');
+  if (!box) return;
+  let list = null;
+  try { list = await gamePasses(box.dataset.passes); } catch {}
+  if (!box.isConnected) return;
+  box.innerHTML = '<h3>Game passes</h3>' + (!list ? '<p class="fine">Couldn’t load the passes right now.</p>'
+    : !list.length ? '<p class="fine">No game passes for sale.</p>'
+    : `<p class="fine">${passWord(list.length)} · cheapest ${full(list[0].price)} R$ · typical ${full(median(list.map(p => p.price)))} R$ · priciest ${full(list[list.length - 1].price)} R$</p>
+       <div class="list">${list.map(p => `<div class="row pass"><div class="body"><div class="t">${esc(p.name)}</div></div><b class="price">${full(p.price)} R$</b></div>`).join('')}</div>`);
+}
+// What today's most played games charge, grouped by what their passes do.
+const PASS_KINDS = [['👑', 'VIP', /\bvip\b/i], ['✖️', '2x or double', /\b(?:2x|x2|double)\b/i], ['🍀', 'Luck', /luck/i], ['⚡', 'Speed', /speed|fast|quick/i],
+  ['🤖', 'Auto', /\bauto/i], ['🎒', 'More slots or storage', /slot|storage|inventory|backpack|equip/i], ['🎵', 'Radio or music', /radio|music|boombox/i], ['🛠️', 'Admin or commands', /admin|command/i]];
+async function openPassPrices() {
+  openSheet(`<div class="stack">
+      <div class="grabber"></div>
+      <h2>🏷️ Game pass prices</h2>
+      <p class="fine">What today’s most played Roblox games charge for their passes, to help you price yours.</p>
+      <div class="stack" id="pp_body"><p class="fine">Checking the top games…</p></div>
+      <div class="actions"><div class="right"><button type="button" class="btn primary" data-close>Done</button></div></div>
+    </div>`, null, 'passes');
+  const top = (state.trending?.games || []).filter(g => g.list === 'Most played' && g.universeId).slice(0, 12);
+  const lists = [];
+  for (const part of chunk(top, 4)) lists.push(...await Promise.all(part.map(g => gamePasses(g.universeId).then(l => ({ g, l }), () => ({ g, l: [] })))));
+  const body = $('#pp_body');
+  if (!body || sheetName !== 'passes') return;
+  const all = lists.flatMap(x => x.l);
+  if (!all.length) { body.innerHTML = `<p class="fine">${top.length ? 'Couldn’t load prices right now. Try again in a minute.' : 'The top games haven’t loaded yet. Try again in a moment.'}</p>`; return; }
+  const range = l => { const lo = Math.min(...l), hi = Math.max(...l); return lo === hi ? `${full(lo)} R$` : `${full(lo)}–${full(hi)} R$`; };
+  const kinds = PASS_KINDS.map(([e, label, re]) => { const p = all.filter(x => re.test(x.name)).map(x => x.price); return p.length ? { e, label, p } : null; }).filter(Boolean);
+  body.innerHTML = statTiles([['Typical price', full(median(all.map(p => p.price))) + ' R$'], ['Passes checked', full(all.length)]])
+    + (kinds.length ? `<div class="sec"><h3>By type</h3></div><div class="list">${kinds.map(k => `<div class="row pass"><span class="em" aria-hidden="true">${k.e}</span><div class="body"><div class="t">${k.label}</div><span class="sub">${passWord(k.p.length)} · ${range(k.p)}</span></div><b class="price">${full(median(k.p))} R$</b></div>`).join('')}</div>` : '')
+    + `<div class="sec"><h3>Per game</h3></div><div class="list">${lists.filter(x => x.l.length).map(x => `<button type="button" class="row pass" data-pp="${esc(x.g.id)}"><div class="body"><div class="t">${esc(x.g.name)}</div><span class="sub">${passWord(x.l.length)} · ${range(x.l.map(p => p.price))}</span></div><b class="price">${full(median(x.l.map(p => p.price)))} R$</b></button>`).join('')}</div>
+      <p class="fine">The price on the right is the typical (middle) price. Tap a game to see all its passes.</p>`;
+  body.querySelectorAll('[data-pp]').forEach(b => { b.onclick = () => { const g = top.find(x => x.id === b.dataset.pp); if (g) openTrend(g); }; });
+}
+
+/* ---------- icon tester and Robux calculator ---------- */
+function openIconTester() {
+  let src = '', pos = 2;
+  const tops = (state.trending?.games || []).filter(g => g.list === 'Most played' && g.icon).slice(0, 5);
+  openSheet(`<div class="stack">
+      <div class="grabber"></div>
+      <h2>🖼️ Icon tester</h2>
+      <p class="fine">See how your icon looks next to today’s top games, the way players see them. Your picture stays on this device.</p>
+      <label class="btn primary"><input type="file" id="it_file" accept="image/*" hidden>Choose your icon</label>
+      <div class="field"><label for="it_name">Game name</label><input id="it_name" maxlength="50" placeholder="My Roblox game"></div>
+      <div class="it-grid" id="it_grid"></div>
+      ${tops.length ? '' : '<p class="fine">The top games haven’t loaded yet, so only your icon shows.</p>'}
+      <div class="actions"><button type="button" class="btn" id="it_move">↻ Move it</button><div class="right"><button type="button" class="btn primary" data-close>Done</button></div></div>
+    </div>`, sheet => {
+    const grid = sheet.querySelector('#it_grid'), nameIn = sheet.querySelector('#it_name');
+    const draw = () => {
+      const tiles = tops.map(g => ({ icon: g.icon, name: g.name, meta: `👍 ${g.likeRatio ?? '–'}% · ${fmt(g.ccu)}` }));
+      tiles.splice(Math.min(pos, tiles.length), 0, { icon: src, name: nameIn.value.trim() || 'My game', meta: '👍 – · New', me: true });
+      grid.innerHTML = tiles.map(t => `<div class="it-tile">${t.icon ? `<img src="${esc(t.icon)}" alt="" ${t.me ? '' : 'referrerpolicy="no-referrer"'}>` : '<div class="it-empty">Your icon here</div>'}<b>${esc(t.name)}</b><span>${esc(t.meta)}</span></div>`).join('');
+    };
+    sheet.querySelector('#it_file').onchange = e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      // Crop to a square like Roblox does, and shrink it so big photos stay quick.
+      const img = new Image(), url = URL.createObjectURL(f);
+      img.onload = () => {
+        const s = Math.min(img.naturalWidth, img.naturalHeight), c = document.createElement('canvas');
+        c.width = c.height = 512;
+        c.getContext('2d').drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2, s, s, 0, 0, 512, 512);
+        src = c.toDataURL('image/jpeg', .9);
+        URL.revokeObjectURL(url);
+        draw();
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); toast('That file isn’t a picture RoHub can open.'); };
+      img.src = url;
+    };
+    nameIn.oninput = draw;
+    sheet.querySelector('#it_move').onclick = () => { pos = (pos + 2) % (tops.length + 1); draw(); };
+    draw();
+  }, 'icons');
+}
+// Roblox's standard DevEx rate and cash-out minimum (Creator Hub, 2026). Creators keep 70% of game pass sales.
+const DEVEX_RATE = 0.0038, DEVEX_MIN = 30000, CREATOR_SHARE = 0.7;
+const usd = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+function openCalculator() {
+  const mine = byKind('game'), total = k => mine.reduce((a, g) => a + num(g[k]), 0);
+  const numIn = (id, label, val) => `<div class="field"><label for="${id}">${label}</label><input id="${id}" type="number" inputmode="numeric" min="0" step="1" value="${val}"></div>`;
+  openSheet(`<div class="stack">
+      <div class="grabber"></div>
+      <h2>💰 Robux calculator</h2>
+      <div class="sec"><h3>Game pass sales</h3><p class="fine">Roblox keeps 30% of each sale, so you get 70%.</p></div>
+      <div class="grid2">${numIn('rc_price', 'Price (Robux)', 100)}${numIn('rc_sales', 'Sales', 50)}</div>
+      <div class="result" id="rc_sold"></div>
+      <div class="sec"><h3>Robux to real money</h3><p class="fine">Through DevEx, Roblox pays $0.0038 for each earned Robux. To cash out you need at least 30,000 earned Robux and must be 13 or older.</p></div>
+      ${numIn('rc_robux', 'Earned Robux', total('robux') || 30000)}
+      <div class="result" id="rc_cash"></div>
+      <div class="sec"><h3>Ads</h3><p class="fine">See how many ad credits each visit cost you.</p></div>
+      <div class="grid2">${numIn('rc_ads', 'Ad credits spent', total('adCredits') || 50)}${numIn('rc_visits', 'Visits from ads', 2000)}</div>
+      <div class="result" id="rc_ad"></div>
+      <div class="actions"><div class="right"><button type="button" class="btn primary" data-close>Done</button></div></div>
+    </div>`, sheet => {
+    const v = id => Math.max(0, Math.floor(Number(sheet.querySelector('#' + id).value) || 0));
+    const out = (id, html) => { sheet.querySelector('#' + id).innerHTML = html; };
+    const calc = () => {
+      const each = Math.floor(v('rc_price') * CREATOR_SHARE), got = each * v('rc_sales');
+      out('rc_sold', `You get <b>${full(got)} Robux</b> (${full(each)} per sale)${got ? `, about <b>${usd(got * DEVEX_RATE)}</b> through DevEx` : ''}`);
+      const r = v('rc_robux');
+      out('rc_cash', `<b>${full(r)} Robux ≈ ${usd(r * DEVEX_RATE)}</b>${r < DEVEX_MIN ? ` · ${full(DEVEX_MIN - r)} more to reach the 30,000 minimum` : ''}`);
+      const ads = v('rc_ads'), visits = v('rc_visits');
+      out('rc_ad', ads && visits ? `<b>${(ads / visits).toFixed(ads / visits < .1 ? 3 : 2)} credits per visit</b> · ${full(visits / ads)} visits per credit` : 'Fill in both to see what each visit cost.');
+    };
+    sheet.querySelectorAll('input').forEach(i => { i.oninput = calc; });
+    calc();
+  }, 'calc');
+}
+
+/* ---------- share RoHub ---------- */
+const SITE = 'https://rohub-app.github.io/';
+const copyText = text => navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject(new Error('no clipboard'));
+// The phone's share sheet when there is one, otherwise copy the link.
+function shareLink(url, title, text) {
+  if (navigator.share) return navigator.share({ title, text, url }).catch(() => {});
+  return copyText(url).then(() => toast('Link copied'), () => toast('Couldn’t copy the link.'));
+}
+function openShare() {
+  openSheet(`<div class="stack">
+      <div class="grabber"></div>
+      <h2>📲 Share RoHub</h2>
+      <p class="fine">Friends can point their phone camera at this code, or you can send them the link.</p>
+      <img class="qr" src="icons/qr.svg" width="220" height="220" alt="QR code for rohub-app.github.io">
+      <div class="linkbox">rohub-app.github.io</div>
+      <div class="actions"><button type="button" class="btn" id="sh_copy">Copy link</button><div class="right"><button type="button" class="btn primary" id="sh_go">Share</button></div></div>
+    </div>`, sheet => {
+    sheet.querySelector('#sh_copy').onclick = () => copyText(SITE).then(() => toast('Link copied'), () => toast('Couldn’t copy. The link is rohub-app.github.io'));
+    sheet.querySelector('#sh_go').onclick = () => shareLink(SITE, 'RoHub', 'RoHub: your Roblox ideas, tasks, games and what’s trending. Free, no account.');
+  }, 'share');
+}
+
+/* ---------- team projects: share a game's tasks by link ---------- */
+// The tasks travel in "#team=", the part of a link browsers never send to a server.
+const toB64 = s => { let bin = ''; new TextEncoder().encode(s).forEach(b => { bin += String.fromCharCode(b); }); return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); };
+const fromB64 = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0)));
+function openTeamShare(game) {
+  const tasks = byKind('task').filter(t => sameName(t.game || '', game)).map(({ id, title, done, due, priority, notes, createdAt, updatedAt }) =>
+    ({ id, title, done: !!done, due: due || '', priority: priority || 'Normal', notes: notes || '', createdAt: createdAt || 0, updatedAt: updatedAt || createdAt || 0 }));
+  const from = state.player?.robloxName || state.link?.username || '';
+  const url = SITE + '#team=' + toB64(JSON.stringify({ app: 'RoHub', team: 1, game, from, at: Date.now(), tasks }));
+  openSheet(`<div class="stack">
+      <div class="grabber"></div>
+      <h2>👥 Share with your team</h2>
+      <p class="about">Send this link to the friends building <b>${esc(game)}</b> with you. When they open it, RoHub adds your ${plural(tasks.length, 'task')} to theirs.</p>
+      <p class="fine">When they tick things off, they can send their link back to you, and RoHub keeps the newest version of each task. Deleting a task only removes it on your device.</p>
+      <div class="actions"><button type="button" class="btn" id="tm_copy">Copy link</button><div class="right"><button type="button" class="btn primary" id="tm_send">Send</button></div></div>
+    </div>`, sheet => {
+    sheet.querySelector('#tm_copy').onclick = () => copyText(url).then(() => toast('Link copied'), () => toast('Couldn’t copy the link.'));
+    sheet.querySelector('#tm_send').onclick = () => shareLink(url, `RoHub tasks: ${game}`, `Our tasks for ${game} in RoHub`);
+  }, 'team');
+}
+function takeTeam() {
+  if (!location.hash.startsWith('#team=')) return;
+  let data = null;
+  try { data = JSON.parse(fromB64(location.hash.slice(6))); } catch {}
+  history.replaceState(null, '', location.pathname + location.search);
+  if (!data || data.app !== 'RoHub' || !Array.isArray(data.tasks) || !data.game) { toast('That team link didn’t work. Ask for a new one.'); return; }
+  const game = String(data.game).slice(0, 80), now = Date.now();
+  const clean = data.tasks.filter(t => t && t.id && t.title).slice(0, 300).map(t => ({ id: String(t.id).slice(0, 40), kind: 'task', title: String(t.title).slice(0, 200), game,
+    done: !!t.done, due: /^\d{4}-\d{2}-\d{2}$/.test(t.due) ? t.due : '', priority: ['High', 'Normal', 'Low'].includes(t.priority) ? t.priority : 'Normal',
+    notes: String(t.notes || '').slice(0, 1000), createdAt: num(t.createdAt) || now, updatedAt: num(t.updatedAt) || num(t.createdAt) || now }));
+  const mineOf = t => state.items.find(x => x.id === t.id && x.kind === 'task');
+  const add = clean.filter(t => !mineOf(t)).length, upd = clean.filter(t => mineOf(t) && t.updatedAt > (mineOf(t).updatedAt || mineOf(t).createdAt || 0)).length;
+  openSheet(`<div class="stack">
+      <div class="grabber"></div>
+      <h2>👥 Tasks for ${esc(game)}</h2>
+      <p class="about">${data.from ? '@' + esc(String(data.from).slice(0, 30)) : 'A teammate'} shared ${plural(clean.length, 'task')}: ${add} new and ${upd} updated.</p>
+      <div class="list">${clean.slice(0, 40).map(t => `<div class="row ${t.done ? 'done' : ''}"><div class="body"><div class="t">${esc(t.title)}</div></div></div>`).join('')}</div>
+      <div class="actions"><div class="right"><button type="button" class="btn" data-close>Not now</button><button type="button" class="btn primary" id="tm_take" ${add + upd ? '' : 'disabled'}>${add + upd ? 'Add to my tasks' : 'Already up to date'}</button></div></div>
+    </div>`, sheet => {
+    sheet.querySelector('#tm_take').onclick = () => {
+      clean.forEach(t => {
+        const i = state.items.findIndex(x => x.id === t.id);
+        if (i < 0) state.items.push(t);
+        else if (state.items[i].kind !== 'task') state.items.push({ ...t, id: 'i' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6) });
+        else if (t.updatedAt > (state.items[i].updatedAt || state.items[i].createdAt || 0)) state.items[i] = { ...state.items[i], ...t };
+      });
+      persist(); closeSheet(); state.taskGame = game; goTab('tasks'); toast('Tasks added');
+    };
+  }, 'team-in');
+}
+
+/* ---------- news since your last visit ---------- */
+const MILESTONES = [100, 500, 1e3, 5e3, 1e4, 5e4, 1e5, 5e5, 1e6, 5e6, 1e7, 5e7, 1e8, 5e8, 1e9];
+const FAV_MILESTONES = [10, 50, 100, 500, 1e3, 5e3, 1e4, 5e4, 1e5, 5e5, 1e6];
+const crossed = (marks, before, now) => marks.filter(m => before < m && now >= m).pop();
+// The numbers saved during your last visit are the "before"; this visit's numbers are saved as the
+// next "before" once they've loaded.
+let newsBase = null, newsRolled = false, newsSeen = false;
+function rollNews() {
+  if (newsRolled || !state.trending || (state.link && rbxStatus() === 'pending')) return;
+  newsRolled = true;
+  const old = newsBase?.games || {}, games = {};
+  if (rbxStatus() === 'ok') connectedGames().forEach(g => { games[g.universeId] = { visits: num(g.visits), favorites: num(g.favorites), best: Math.max(num(g.ccu), old[g.universeId]?.best || 0) }; });
+  state.prefs = { ...state.prefs, snap: { at: Date.now(), games: rbxStatus() === 'ok' ? games : old, charts: state.trending.games.map(g => String(g.universeId)) } };
+  persist(true);
+}
+function newsItems() {
+  const out = [], base = newsBase, t = today();
+  const open = byKind('task').filter(x => !x.done);
+  const late = open.filter(x => x.due && x.due < t).length, due = open.filter(x => x.due === t).length;
+  if (late) out.push({ e: '⚠️', t: `${plural(late, 'task')} overdue`, go: 'tasks' });
+  if (due) out.push({ e: '⏰', t: `${plural(due, 'task')} due today`, go: 'tasks' });
+  if (base && rbxStatus() === 'ok') {
+    const known = Object.keys(base.games || {}).length, gains = [];
+    connectedGames().forEach(g => {
+      const b = base.games?.[g.universeId], visits = num(g.visits), favs = num(g.favorites), ccu = num(g.ccu);
+      if (!b) { if (known) out.push({ e: '🆕', t: `New game found: ${g.name}`, go: 'games' }); return; }
+      const v = crossed(MILESTONES, b.visits, visits), f = crossed(FAV_MILESTONES, b.favorites, favs);
+      if (v) out.push({ e: '🎉', t: `${g.name} passed ${fmt(v)} visits`, go: 'games' });
+      else if (visits > b.visits) gains.push({ e: '📈', t: `+${fmt(visits - b.visits)} visits on ${g.name}`, go: 'games', n: visits - b.visits });
+      if (f) out.push({ e: '⭐', t: `${g.name} passed ${fmt(f)} favorites`, go: 'games' });
+      if (ccu >= 3 && ccu > (b.best || 0)) out.push({ e: '🔥', t: `New record: ${fmt(ccu)} people playing ${g.name}`, go: 'games' });
+    });
+    out.push(...gains.sort((a, b) => b.n - a.n).slice(0, 3));
+  }
+  if (base?.charts?.length && state.trending) {
+    const seen = new Set(base.charts);
+    state.trending.games.filter(g => g.list === 'Most played' && !seen.has(String(g.universeId))).slice(0, 3)
+      .forEach(g => out.push({ e: '🆕', t: `New in Most played: ${g.name}`, go: 'trending' }));
+  }
+  out.push({ e: '💡', t: `Today’s idea: ${dailyIdea().t}`, go: 'ideas', daily: true });
+  return out;
+}
+function newsBadge() {
+  const fresh = newsItems().filter(x => !x.daily).length + (state.prefs.ideaSeen === localDay() ? 0 : 1);
+  $('#newsBtn .badge').hidden = newsSeen || !fresh;
+}
+function openNews() {
+  newsSeen = true;
+  if (state.prefs.ideaSeen !== localDay()) { state.prefs = { ...state.prefs, ideaSeen: localDay() }; persist(true); }
+  const items = newsItems();
+  openSheet(`<div class="stack">
+      <div class="grabber"></div>
+      <h2>🔔 ${newsBase ? 'Since your last visit' : 'News'}</h2>
+      <div class="list">${items.map((n, i) => `<button type="button" class="row" data-news="${i}"><span class="em" aria-hidden="true">${n.e}</span><div class="body"><div class="t">${esc(n.t)}</div></div><span class="chev">›</span></button>`).join('')}</div>
+      ${state.link ? '' : '<p class="fine">Connect your Roblox account in Settings to get news about your own games.</p>'}
+      <div class="actions"><button type="button" class="btn" id="nw_share">📲 Share RoHub</button><div class="right"><button type="button" class="btn primary" data-close>Done</button></div></div>
+    </div>`, sheet => {
+    sheet.querySelectorAll('[data-news]').forEach(b => { b.onclick = () => { const n = items[+b.dataset.news]; closeSheet(); goTab(n.go); }; });
+    sheet.querySelector('#nw_share').onclick = openShare;
+  }, 'news');
+  newsBadge();
+}
+function goTab(tab) {
+  if (!TABS.some(t => t.id === tab)) return;
+  state.tab = tab;
+  try { history.replaceState(null, '', '#' + tab); } catch {}
+  $('#scroller').scrollTop = 0;
+  render();
+  if (tab === 'games') refreshPlayer(false);
+}
+
 /* ---------- Roblox account and communities ---------- */
 function connect(raw) {
   const name = String(raw || '').trim().replace(/^@/, '');
@@ -1231,6 +1640,7 @@ function openSettings() {
       <div class="grabber"></div>
       <h2>Settings</h2>
       <div class="list">
+        <button type="button" class="row" data-go="share"><div class="body"><div class="t">📲 Share RoHub</div><span class="sub">QR code and link for your friends</span></div><span class="chev">›</span></button>
         <button type="button" class="row" data-go="account"><div class="body"><div class="t">Roblox account</div><span class="sub">${state.link ? '@' + esc(state.link.username) : 'Not connected'}</span></div><span class="chev">›</span></button>
         <button type="button" class="row" data-go="communities"><div class="body"><div class="t">Your communities</div><span class="sub">${plural((state.link?.communities || []).length, 'community').replace('communitys', 'communities')} added</span></div><span class="chev">›</span></button>
         <button type="button" class="row" data-go="stats"><div class="body"><div class="t">RoHub stats</div><span class="sub">Visits, devices and where people found RoHub</span></div><span class="chev">›</span></button>
@@ -1244,7 +1654,7 @@ function openSettings() {
       <div class="sec"><h3>About RoHub</h3><p class="fine">Trending updates every 30 minutes from Roblox’s charts. Your games load live from Roblox through RoProxy. RoHub isn’t made by or affiliated with Roblox.</p></div>
       <div class="actions"><button type="button" class="btn danger" id="resetBtn">Erase RoHub data</button><div class="right"><button type="button" class="btn primary" data-close>Done</button></div></div>
     </div>`, sheet => {
-    sheet.querySelectorAll('[data-go]').forEach(b => { b.onclick = () => ({ account: openAccount, communities: openCommunities, stats: openStats })[b.dataset.go](); });
+    sheet.querySelectorAll('[data-go]').forEach(b => { b.onclick = () => ({ account: openAccount, communities: openCommunities, stats: openStats, share: openShare })[b.dataset.go](); });
     $('#backupBtn').onclick = () => {
       const blob = new Blob([JSON.stringify({ app: 'RoHub', version: 1, exportedAt: Date.now(), items: state.items, link: state.link, prefs: state.prefs }, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
@@ -1399,12 +1809,8 @@ async function openStats() {
 
 /* ---------- events ---------- */
 $('#tabs').addEventListener('click', e => {
-  const b = e.target.closest('[data-tab]'); if (!b) return;
-  state.tab = b.dataset.tab;
-  try { history.replaceState(null, '', '#' + state.tab); } catch {}
-  $('#scroller').scrollTop = 0;
-  render();
-  if (state.tab === 'games') refreshPlayer(false);
+  const b = e.target.closest('[data-tab]');
+  if (b) goTab(b.dataset.tab);
 });
 $('#main').addEventListener('click', e => {
   const tog = e.target.closest('[data-toggle]');
@@ -1424,6 +1830,19 @@ $('#main').addEventListener('click', e => {
   if (act === 'search') { runSearch(state.search.q); return; }
   if (act === 'more') { runSearch(state.search.q, true); return; }
   if (act === 'shuffle') { state.bankPage++; render(); return; }
+  if (act === 'checklists') { openChecklists(); return; }
+  if (act === 'team') { if (state.taskGame && state.taskGame !== 'All') openTeamShare(state.taskGame); return; }
+  if (act === 'icon-test') { openIconTester(); return; }
+  if (act === 'robux') { openCalculator(); return; }
+  if (act === 'passes') { openPassPrices(); return; }
+  const tgame = e.target.closest('[data-tgame]');
+  if (tgame) {
+    const x = $('.chips')?.scrollLeft || 0;
+    state.taskGame = tgame.dataset.tgame;
+    render();
+    if ($('.chips')) $('.chips').scrollLeft = x;
+    return;
+  }
   const genre = e.target.closest('[data-genre]');
   if (genre) {
     // Keep the genre row where it was scrolled to.
@@ -1481,20 +1900,31 @@ $('#searchClear').onclick = () => {
   clearTimeout(searchTimer); resetSearch(); render();
   $('#searchIn').focus();
 };
-$('#fab').onclick = () => { const kind = TABS.find(t => t.id === state.tab).kind; if (kind) openForm(kind); };
+$('#fab').onclick = () => {
+  const kind = TABS.find(t => t.id === state.tab).kind;
+  // New tasks start in the game you're looking at.
+  if (kind) openForm(kind, null, kind === 'task' && state.taskGame !== 'All' && state.taskGame ? { game: state.taskGame } : null);
+};
 $('#settingsBtn').onclick = openSettings;
+$('#newsBtn').onclick = openNews;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { loadTrending(); refreshPlayer(false); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { bumpStreak(); loadTrending(); refreshPlayer(false); } });
 
 /* ---------- start ---------- */
 load();
 takeMove();
 countVisit();
+bumpStreak();
+newsBase = state.prefs.snap || null;
 const startTab = location.hash.slice(1);
 if (TABS.some(t => t.id === startTab)) state.tab = startTab;
 render();
+takeTeam();
 if (startTab === 'stats') openStats();
-window.addEventListener('hashchange', () => { if (location.hash === '#stats') openStats(); });
+window.addEventListener('hashchange', () => {
+  if (location.hash === '#stats') openStats();
+  if (location.hash.startsWith('#team=')) takeTeam();
+});
 loadTrending();
 refreshPlayer(false);
 setInterval(() => { loadTrending(); refreshPlayer(false); }, 15 * 60 * 1000);
