@@ -39,16 +39,17 @@
   --font: "Nunito", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
   --r: 18px;
   --check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.5 12.5l4.2 4.2L18.5 8'/%3E%3C/svg%3E");
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 * { -webkit-tap-highlight-color: transparent; }
-html, body { background: var(--bg); color: var(--fg); }
+/* The page itself never scrolls; only .scroller does. Otherwise Safari's address bar shrinks and grows
+   while you scroll and drags the tab bubble up and down with it. */
+html, body { height: 100%; overflow: hidden; overscroll-behavior: none; background: var(--bg); color: var(--fg); }
+.scroller { position: fixed; inset: 0; box-sizing: border-box; overflow-x: hidden; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; padding-top: env(safe-area-inset-top, 0px); }
 body { margin: 0; font-family: var(--font); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
-.wrap { max-width: 640px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 112px; }
+.wrap { max-width: 640px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 calc(env(safe-area-inset-bottom, 0px) + 112px); }
 :focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 
 header { padding-block: 14px 4px; }
@@ -249,10 +250,41 @@ a.mini { text-decoration: none; display: inline-flex; align-items: center; }
 
 @media (prefers-reduced-motion: reduce) { .orb, .w-logo, .w-title, .w-q, .w-step, .ring, .ring > *, .welcome.out { animation: none !important; } .dot { display: none; } }
 
+.search { position: relative; margin-top: 14px; }
+.search input { background-color: var(--surface); border-radius: 999px; padding: 12px 44px 12px 42px; -webkit-appearance: none; appearance: none; }
+.search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.s-icon { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--faint); pointer-events: none; }
+.s-clear { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); appearance: none; border: 0; padding: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--raised); color: var(--muted); display: grid; place-items: center; cursor: pointer; }
+.btn.more { align-self: center; }
+
+.bank-h { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; padding-top: 8px; }
+.bank-h .group-h { padding-top: 0; }
+.chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 2px 16px; }
+.chips::-webkit-scrollbar { display: none; }
+.chips .chip.pick { flex: none; white-space: nowrap; background: var(--surface); color: var(--muted); }
+.chips .chip.pick[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.row .em { flex: none; width: 34px; font-size: 26px; line-height: 1.1; text-align: center; }
+.row .mini:disabled { color: var(--ok); opacity: 1; cursor: default; }
+.sheet .list .mini { background: var(--bg); }
+.sheet .banner { background: var(--raised); }
+.row .pitch { color: var(--muted); font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.mini.push { margin-left: auto; }
+.cta.ai { background: radial-gradient(120% 150% at 0% 0%, color-mix(in srgb, var(--glow1) 30%, transparent), transparent 60%), radial-gradient(120% 150% at 100% 100%, color-mix(in srgb, var(--glow2) 24%, transparent), transparent 60%), var(--surface); }
+.btn.ai-btn { align-self: center; }
+.ideas-out { display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 12px; }
+.ideas-out .row .meta { padding-top: 2px; }
+.thinking { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 15px; font-weight: 700; padding: 8px 4px; }
+.thinking i { width: 8px; height: 8px; border-radius: 50%; background: var(--glow-text); animation: blink 1.2s ease-in-out infinite; }
+.thinking i:nth-child(2) { animation-delay: .2s; }
+.thinking i:nth-child(3) { animation-delay: .4s; margin-right: 4px; }
+@keyframes blink { 0%, 100% { opacity: .3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+@media (prefers-reduced-motion: reduce) { .thinking i { animation: none; } }
+
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); background: var(--raised); color: var(--fg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 700; z-index: 30; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0, 0, 0, .6); }
 </style>
 </head>
 <body>
+<div class="scroller" id="scroller">
 <div class="wrap">
   <header>
     <div class="top">
@@ -262,7 +294,13 @@ a.mini { text-decoration: none; display: inline-flex; align-items: center; }
     <h1 id="title">Ideas</h1>
     <p class="subtitle" id="subtitle"></p>
   </header>
+  <form class="search" id="searchForm" role="search" hidden>
+    <svg class="s-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input type="search" id="searchIn" placeholder="Search all Roblox games" aria-label="Search all Roblox games" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <button type="button" class="s-clear" id="searchClear" aria-label="Clear search" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </form>
   <main id="main"></main>
+</div>
 </div>
 <div class="dock">
   <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
@@ -301,6 +339,7 @@ const SCHEMA = {
     { k: 'game', label: 'Game', type: 'text', ph: 'Catastrophic Chess', half: true },
     { k: 'due', label: 'Due', type: 'date', half: true },
     { k: 'priority', label: 'Priority', type: 'select', opts: ['Normal', 'High', 'Low'] },
+    { k: 'notes', label: 'Notes', type: 'area' },
     { k: 'done', label: 'Done', type: 'bool' },
   ]},
   game: { title: 'Game', fields: [
@@ -321,7 +360,7 @@ const SCHEMA = {
 // Everything personal lives in this browser; Roblox data comes live from Roblox through RoProxy,
 // a public proxy that lets websites read Roblox's APIs.
 const STORE_KEY = 'rohub-v1';
-const RP = { users: 'https://users.roproxy.com', games: 'https://games.roproxy.com', thumbs: 'https://thumbnails.roproxy.com', groups: 'https://groups.roproxy.com' };
+const RP = { users: 'https://users.roproxy.com', games: 'https://games.roproxy.com', thumbs: 'https://thumbnails.roproxy.com', groups: 'https://groups.roproxy.com', apis: 'https://apis.roproxy.com' };
 const PLAYER_TTL = 10 * 60 * 1000;
 const USERNAME_RE = /^[A-Za-z0-9_]{3,20}$/;
 const STAFF_RE = /\b(?:owner|co-owner|admin|administrator|dev|developer|builder|scripter|modeler|designer|staff|creator|manager|founder)s?\b/i;
@@ -332,7 +371,8 @@ const SOURCES = [['tiktok', '🎵', 'TikTok'], ['youtube', '▶️', 'YouTube'],
 const COUNTER = 'https://abacus.jasoncameron.dev';
 const COUNTER_NS = 'rohub-creatorluisrobiz';
 
-const state = { tab: 'ideas', items: [], link: null, player: null, playerAt: 0, prefs: {}, trending: null, trendingError: false, loadingPlayer: false, playerError: false, welcomeOpen: false, welcomeDone: false };
+const state = { tab: 'ideas', items: [], link: null, player: null, playerAt: 0, prefs: {}, trending: null, trendingError: false, loadingPlayer: false, playerError: false, welcomeOpen: false, welcomeDone: false,
+  search: { q: '', results: [], next: null, loading: false, error: false, token: 0 }, bankGenre: 'All', bankPage: 0 };
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -581,9 +621,77 @@ const empty = (title, hint) => `<div class="empty"><strong>${title}</strong><spa
 const art = (src, name, cls) => src ? `<img class="${cls}" src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<div class="${cls} ph" aria-hidden="true">${esc(String(name || '?').trim().charAt(0).toUpperCase())}</div>`;
 const changeChip = g => g.change == null ? '' : `<span class="${g.change >= 0 ? 'up' : 'down'}">${g.change >= 0 ? '▲' : '▼'} ${Math.abs(Math.round(g.change * 100))}%</span>`;
 
+// Ready-made ideas for anyone who's stuck: original, buildable in Studio, grouped by genre.
+const IDEA_BANK = [
+  { e: '🌋', g: 'Obby', t: 'Rising lava tower', p: 'Climb a tower while lava rises every 30 seconds. Friends can drop quick bridges to save each other.' },
+  { e: '🪞', g: 'Obby', t: 'Mirror obby', p: 'Controls flip on every stage, so left is right and jumps feel wrong. Short, chaotic and great for clips.' },
+  { e: '🖍️', g: 'Obby', t: 'Draw-your-path obby', p: 'Draw your own platforms with limited ink to cross each gap. Fewer strokes earn more stars.' },
+  { e: '🤝', g: 'Obby', t: 'Tied-together obby', p: 'Two friends are tied with a rope and have to jump in sync, or both fall.' },
+  { e: '🍕', g: 'Tycoon', t: 'Pizza delivery tycoon', p: 'Build a pizza shop, then race deliveries across town to unlock faster scooters and new toppings.' },
+  { e: '🚀', g: 'Tycoon', t: 'Space station tycoon', p: 'Grow a station one module at a time. Asteroid storms test how well you built it.' },
+  { e: '🎢', g: 'Tycoon', t: 'Theme park with real riders', p: 'Design rides that other players actually ride. Their ratings earn you cash for bigger rides.' },
+  { e: '🧪', g: 'Tycoon', t: 'Potion shop tycoon', p: 'Mix ingredients to discover recipes, then sell potions to heroes heading into dungeons.' },
+  { e: '🧽', g: 'Simulator', t: 'City cleaning simulator', p: 'Wash cars, houses and whole streets with bigger and bigger hoses. Rare dirt hides rare pets.' },
+  { e: '🐝', g: 'Simulator', t: 'Bee colony simulator', p: 'Grow a hive, breed bees with mutations and defend it from wasps at night.' },
+  { e: '🎣', g: 'Simulator', t: 'Deep-sea fishing', p: 'Every upgrade lets you fish deeper, where the catches glow, get rarer and bite back.' },
+  { e: '🦴', g: 'Simulator', t: 'Steal a fossil', p: 'Dig up fossils, build a museum, then sneak into other players’ museums to steal their rarest bones.' },
+  { e: '🍄', g: 'Simulator', t: 'Mushroom farm mutations', p: 'Plant mushrooms that mutate with the weather. Rare mutations sell for a fortune at the night market.' },
+  { e: '🎲', g: 'RNG', t: 'Aura tower RNG', p: 'Roll auras to climb a tower. Each floor needs a rarer aura and raises your luck.' },
+  { e: '🌩️', g: 'RNG', t: 'Weather powers RNG', p: 'Roll for weather powers like thunder or blizzards, then use them in quick arena fights.' },
+  { e: '🃏', g: 'RNG', t: 'Card pack battler', p: 'Open packs, roll card rarities and battle friends with your best deck of five.' },
+  { e: '🏫', g: 'Horror', t: 'Night shift at school', p: 'Survive five nights as the janitor while something moves the desks. Every night adds a new rule.' },
+  { e: '📼', g: 'Horror', t: 'Camcorder horror', p: 'You can only see the monster through your camcorder screen, and the battery is running out.' },
+  { e: '🛗', g: 'Horror', t: 'The endless elevator', p: 'Every floor is a different short scare. Your team votes on whether to open the doors.' },
+  { e: '🧸', g: 'Horror', t: 'Toy factory after dark', p: 'Fix the machines while the toys come alive. Team tasks keep everyone moving and screaming.' },
+  { e: '🍩', g: 'Tower defense', t: 'Snack tower defense', p: 'Defend the fridge from ants with snack towers. Merging two snacks makes a brand-new tower.' },
+  { e: '🧱', g: 'Tower defense', t: 'Build-the-maze defense', p: 'Place walls to make the enemy path longer, then defend it. The longest maze earns bonus coins.' },
+  { e: '🤖', g: 'Tower defense', t: 'Server-wide boss waves', p: 'Every tenth wave is a giant boss that the whole server fights together for shared rewards.' },
+  { e: '🏨', g: 'Roleplay', t: 'Hotel roleplay', p: 'Work as receptionist, chef or cleaner. Guests leave reviews that unlock upgrades for the hotel.' },
+  { e: '🐶', g: 'Roleplay', t: 'Pet vet clinic', p: 'Treat sick pets with quick mini-games and adopt the ones nobody picks up.' },
+  { e: '🏛️', g: 'Roleplay', t: 'Mayor for a day', p: 'One player becomes mayor each round and sets the town’s rules. Everyone votes on them at the end.' },
+  { e: '🚂', g: 'Roleplay', t: 'Train crew', p: 'Drive the train, check tickets or serve snacks on a long ride through changing landscapes.' },
+  { e: '⚽', g: 'PvP', t: 'Power-up dodgeball', p: 'Short team rounds where you grab power-ups like curve balls, shields and giant balls.' },
+  { e: '🍳', g: 'PvP', t: 'Kitchen brawl', p: 'Fight with pans and food in a chaotic kitchen. Spilled sauce makes the floor slippery.' },
+  { e: '🏹', g: 'PvP', t: 'Last archer standing', p: 'Bows-only battle royale. The arena shrinks until everyone is fighting on one tower.' },
+  { e: '🛹', g: 'PvP', t: 'Skate battles', p: 'Battle rivals with tricks in a skatepark. Landing a combo steals their points.' },
+  { e: '🏝️', g: 'Survival', t: 'Shipwreck island', p: 'Wash up with friends, craft rafts and decide who keeps watch at night.' },
+  { e: '❄️', g: 'Survival', t: 'Frozen city', p: 'Keep the fire burning while a blizzard grows. Supply runs get riskier every day.' },
+  { e: '🌊', g: 'Survival', t: 'Rising flood', p: 'The map floods a little every minute. Build upward or find a boat before it’s too late.' },
+  { e: '🔦', g: 'Puzzle', t: 'Split-clue escape room', p: 'Each room hides a code, and only one player can see each clue, so the team has to talk.' },
+  { e: '🧲', g: 'Puzzle', t: 'Gravity flip rooms', p: 'Flip gravity to walk on walls and ceilings and reach the exit.' },
+  { e: '🕵️', g: 'Puzzle', t: 'Mansion mystery', p: 'Find clues around a mansion and vote on who did it. Every round is a new mystery.' },
+  { e: '🎤', g: 'Party', t: 'Talent show', p: 'Perform on stage with emotes and props while the audience votes for the winner.' },
+  { e: '🎨', g: 'Party', t: 'Giant draw and guess', p: 'Draw on a huge canvas the whole server can see while teams race to guess.' },
+  { e: '🎯', g: 'Party', t: 'Minigame marathon', p: '30-second minigames back to back. Points carry over, and the last-place player picks the next game.' },
+  { e: '🐾', g: 'Party', t: 'Pet fashion show', p: 'Dress up your pet, walk the runway and win ribbons that unlock new outfits.' },
+];
+const BANK_GENRES = ['All', ...new Set(IDEA_BANK.map(i => i.g))];
+// A new random order on every visit; "Shuffle" walks through all of them before repeating.
+const BANK_ORDER = IDEA_BANK.map((_, i) => i);
+for (let i = BANK_ORDER.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [BANK_ORDER[i], BANK_ORDER[j]] = [BANK_ORDER[j], BANK_ORDER[i]]; }
+function renderBank() {
+  const pool = BANK_ORDER.filter(i => state.bankGenre === 'All' || IDEA_BANK[i].g === state.bankGenre);
+  const per = 4, pages = Math.ceil(pool.length / per), page = state.bankPage % pages;
+  const have = byKind('idea');
+  return `<div class="bank-h"><div class="group-h">Need ideas? Add one</div>${pages > 1 ? '<button class="mini" data-act="shuffle">↻ Shuffle</button>' : ''}</div>
+    <div class="chips" role="group" aria-label="Idea genres">${BANK_GENRES.map(g => `<button class="chip pick" data-genre="${esc(g)}" aria-pressed="${state.bankGenre === g}">${esc(g)}</button>`).join('')}</div>
+    <div class="list">${pool.slice(page * per, page * per + per).map(i => {
+      const b = IDEA_BANK[i], added = have.some(x => sameName(x.title, b.t));
+      return `<div class="row">
+        <span class="em" aria-hidden="true">${b.e}</span>
+        <div class="body">
+          <div class="t">${esc(b.t)}</div>
+          <div class="pitch">${esc(b.p)}</div>
+          <div class="meta"><span class="chip">${esc(b.g)}</span><button class="mini push" data-bank="${i}" ${added ? 'disabled' : ''}>${added ? 'Added ✓' : '+ Add'}</button></div>
+        </div>
+      </div>`;
+    }).join('')}</div>
+    <button class="btn ai-btn" data-act="ai-new">✨ Get fresh ideas from AI</button>`;
+}
+
 function renderIdeas() {
   const list = byKind('idea').sort((a, b) => (b.hot ? 1 : 0) - (a.hot ? 1 : 0) || (b.createdAt || 0) - (a.createdAt || 0));
-  if (!list.length) return empty('No ideas yet', 'Tap + to write down your first game idea.');
+  if (!list.length) return empty('No ideas yet', 'Tap + to write one down, or add one of these.') + renderBank();
   return `<div class="list">${list.map(i => `
     <div class="row" data-edit="${i.id}">
       <div class="body">
@@ -595,7 +703,7 @@ function renderIdeas() {
         </div>
         ${i.notes ? `<div class="notes">${esc(i.notes)}</div>` : ''}
       </div>
-    </div>`).join('')}</div>`;
+    </div>`).join('')}</div>` + renderBank();
 }
 
 function taskRow(t) {
@@ -609,16 +717,21 @@ function taskRow(t) {
         ${t.due ? `<span class="chip ${overdue ? 'bad' : ''}">${overdue ? 'Overdue · ' : ''}${niceDate(t.due)}</span>` : ''}
         ${t.game ? `<span class="sub">${esc(t.game)}</span>` : ''}
       </div>
+      ${t.notes ? `<div class="notes">${esc(t.notes)}</div>` : ''}
     </div>
   </div>`;
 }
+const aiCard = () => `<div class="cta ai">
+    <div class="txt"><b>✨ Need ideas for your game?</b><span>Pick one of your games, say what it’s about, and the AI suggests ideas you can add as tasks.</span></div>
+    <button class="btn primary" data-act="ai">Ask AI</button>
+  </div>`;
 function renderTasks() {
   const all = byKind('task');
-  if (!all.length) return empty('Nothing to do yet', 'Tap + to add a task, like “Redesign lobby UI”.');
+  if (!all.length) return aiCard() + empty('Nothing to do yet', 'Tap + to add a task, like “Redesign lobby UI”.');
   const pr = { High: 0, Normal: 1, Low: 2 };
   const open = all.filter(t => !t.done).sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999') || (pr[a.priority] ?? 1) - (pr[b.priority] ?? 1));
   const done = all.filter(t => t.done).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-  return `
+  return aiCard() + `
     <div class="group-h">To do</div>
     ${open.length ? `<div class="list">${open.map(taskRow).join('')}</div>` : '<div class="banner">All caught up.</div>'}
     ${done.length ? `<div class="group-h">Done</div><div class="list">${done.map(taskRow).join('')}</div>` : ''}`;
@@ -709,7 +822,23 @@ function renderGames() {
   return html;
 }
 
+function renderFound() {
+  const f = state.search;
+  let html = `<div class="group-h">Results for “${esc(f.q)}”</div>`;
+  if (f.results.length) html += `<div class="grid">${f.results.map(g => `
+    <button class="tile" data-find="${g.universeId}">
+      <div class="art">${art(g.icon, g.name, 'icon')}</div>
+      <div class="tname">${esc(g.name)}</div>
+      <div class="tmeta"><span>${fmt(g.ccu)} playing</span>${g.likeRatio != null ? `<span>👍 ${g.likeRatio}%</span>` : ''}</div>
+    </button>`).join('')}</div>`;
+  if (f.loading) html += '<div class="banner">Searching Roblox…</div>';
+  else if (f.error) html += cta('Couldn’t search Roblox', 'Check your connection and try again.', 'Retry', 'search');
+  else if (!f.results.length) html += empty('No games found', 'Try another name, or fewer words.');
+  else if (f.next) html += '<button class="btn more" data-act="more">Show more</button>';
+  return html;
+}
 function renderTrending() {
+  if (state.search.q) return renderFound();
   const s = state.trending;
   if (!s) return state.trendingError ? cta('Couldn’t load trending games', 'Check your connection and try again.', 'Retry', 'trending') : '<div class="banner">Loading what’s trending…</div>';
   return ['Most played', 'Rising fast'].map(name => {
@@ -729,6 +858,7 @@ function render() {
   $('#title').textContent = TABS.find(t => t.id === state.tab).title;
   $('#subtitle').textContent = subtitle();
   renderTabs();
+  $('#searchForm').hidden = state.tab !== 'trending';
   $('#main').innerHTML = { ideas: renderIdeas, tasks: renderTasks, games: renderGames, trending: renderTrending }[state.tab]();
   $('#fab').classList.toggle('ghost', state.tab === 'trending');
   maybeWelcome();
@@ -850,6 +980,172 @@ function openOwn(g) {
       closeSheet(); toast('Saved');
     };
   });
+}
+
+/* ---------- search every Roblox game ---------- */
+const SEARCH_SESSION = crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2);
+function resetSearch() {
+  const s = state.search;
+  s.token++;
+  Object.assign(s, { q: '', results: [], next: null, loading: false, error: false });
+}
+async function runSearch(q, more) {
+  const s = state.search, token = ++s.token;
+  if (!more) Object.assign(s, { q, results: [], next: null, error: false });
+  s.loading = true; render();
+  try {
+    const res = await getJSON(`${RP.apis}/search-api/omni-search?searchQuery=${encodeURIComponent(s.q)}&sessionId=${SEARCH_SESSION}&pageType=all${more && s.next ? '&pageToken=' + encodeURIComponent(s.next) : ''}`);
+    // Roblox mixes sponsored results and 17+ games into search; leave those out.
+    const seen = new Set(s.results.map(g => g.universeId));
+    const found = (res.searchResults || []).filter(r => r.contentGroupType === 'Game').flatMap(r => r.contents || [])
+      .filter(c => c.universeId && !c.isSponsored && !(c.minimumAge >= 17) && !seen.has(c.universeId) && seen.add(c.universeId))
+      .map(c => {
+        const votes = num(c.totalUpVotes) + num(c.totalDownVotes);
+        return { universeId: c.universeId, placeId: c.rootPlaceId, name: c.name, ccu: c.playerCount || 0, likeRatio: votes ? Math.round(100 * num(c.totalUpVotes) / votes) : null, icon: '' };
+      });
+    const icons = await thumbsOf(`${RP.thumbs}/v1/games/icons?returnPolicy=PlaceHolder&size=256x256&format=Webp&isCircular=false&universeIds=`, found.map(g => g.universeId)).catch(() => ({}));
+    if (token !== s.token) return;
+    found.forEach(g => { g.icon = icons[g.universeId] || ''; });
+    s.results = s.results.concat(found);
+    s.next = res.nextPageToken || null;
+  } catch {
+    if (token !== s.token) return;
+    s.error = true;
+  }
+  s.loading = false; render();
+}
+function openFound(g) {
+  const t = (state.trending?.games || []).find(x => String(x.universeId) === String(g.universeId));
+  if (t) { openTrend(t); return; }
+  const name = 'found:' + g.universeId;
+  let d = { ...g, url: g.placeId ? `https://www.roblox.com/games/${g.placeId}` : '' };
+  const fill = (sheet, loading) => {
+    sheet.innerHTML = `<div class="stack">
+      <div class="grabber"></div>
+      ${gameHead(d, d.genre ? `<span class="chip">${esc(d.genre)}</span>` : '')}
+      ${statsGrid(d)}
+      ${loading ? '<p class="fine">Loading details from Roblox…</p>' : ''}
+      ${d.about ? `<div class="sec"><h3>About the game</h3><p class="about">${esc(d.about)}</p></div>` : ''}
+      <div class="cta ai"><div class="txt"><b>✨ Borrow from this game</b><span>The AI suggests ideas inspired by it for your own game.</span></div><button class="btn primary" data-ai>Get ideas</button></div>
+      <div class="actions">${robloxLink(d)}<div class="right"><button class="btn" data-close>Done</button></div></div>
+    </div>`;
+    sheet.querySelectorAll('[data-close]').forEach(b => { b.onclick = closeSheet; });
+    sheet.querySelector('[data-ai]').onclick = () => openHelper({ inspo: d });
+  };
+  openSheet('', sheet => fill(sheet, true), name);
+  const refill = () => { if (sheetName === name) fill($('#sheetRoot .sheet'), false); };
+  gameDetails([g.universeId]).then(all => {
+    const x = all[g.universeId];
+    if (x) d = { ...d, name: x.sourceName || x.name || d.name, creator: x.creator?.name || '', ccu: x.playing ?? d.ccu, visits: x.visits, favorites: x.favoritedCount,
+      created: x.created, updated: x.updated, genre: x.genre_l1 || '', about: excerpt(x.sourceDescription || x.description, 600) };
+    refill();
+  }, refill);
+}
+
+/* ---------- AI idea helper ---------- */
+// Pollinations is a free AI service that needs no key or account. Only the game details shown in the
+// helper and what the person types are sent to it.
+const AI_URL = 'https://text.pollinations.ai/openai';
+const AI_FOCUS = ['Anything', 'New features', 'Events and updates', 'Keep players coming back', 'Play with friends', 'Earn more Robux'];
+function helperGames() {
+  const out = connectedGames().map(g => ({ name: g.name, genre: g.genre, about: g.about || '' }));
+  byKind('game').forEach(g => { if (!out.some(x => sameName(x.name, g.name))) out.push({ name: g.name, genre: '', about: g.notes || '' }); });
+  return out;
+}
+function parseIdeas(text) {
+  let list = [];
+  try { list = JSON.parse(text.slice(text.indexOf('{'), text.lastIndexOf('}') + 1)).ideas; } catch {}
+  // If the AI ignored the JSON format, read one idea per line instead.
+  if (!Array.isArray(list) || !list.length) list = String(text).split('\n').map(l => l.replace(/^\s*(?:\d+[.)]|[-*•])\s*/, '').trim()).filter(l => l.length > 3)
+    .map(l => { const m = l.match(/^(.{3,80}?)(?:\s[—–-]\s|:\s)(.+)$/); return m ? { title: m[1], detail: m[2] } : { title: l, detail: '' }; });
+  const clean = (s, n) => String(s || '').replace(/\*\*/g, '').trim().slice(0, n);
+  return list.filter(x => x && x.title).slice(0, 6).map(x => ({ title: clean(x.title, 90), detail: clean(x.detail, 260) }));
+}
+async function askAI(ctx, avoid) {
+  const system = 'You are the idea helper in RoHub, an app for Roblox game developers, many of them young. Suggest exactly 5 fresh, specific ideas the developer could build in Roblox Studio. Keep every idea suitable for all ages. Reply with JSON only, shaped like {"ideas":[{"title":"...","detail":"..."}]}. Each title has at most 7 words. Each detail is one sentence of at most 25 words saying what to build and why players would enjoy it.';
+  const ask = ctx.newGame ? ['Give me ideas for a brand-new Roblox game.', ctx.about && `What I like: ${ctx.about}`]
+    : [`My Roblox game: ${ctx.name}${ctx.genre ? ` (${ctx.genre})` : ''}.`, ctx.about && `What it's about: ${ctx.about}`, `What I want ideas for: ${ctx.focus.toLowerCase()}.`];
+  if (ctx.inspo) ask.push(`Borrow what works from the Roblox game "${ctx.inspo.name}"${ctx.inspo.genre ? ` (${ctx.inspo.genre})` : ''}${ctx.inspo.about ? `, described as: ${excerpt(ctx.inspo.about, 300)}` : ''}.`);
+  if (avoid.length) ask.push(`Don't repeat these ideas: ${avoid.join('; ')}.`);
+  const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 45000);
+  try {
+    const r = await fetch(AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl.signal,
+      body: JSON.stringify({ model: 'openai', response_format: { type: 'json_object' }, messages: [{ role: 'system', content: system }, { role: 'user', content: ask.filter(Boolean).join('\n') }] }) });
+    if (!r.ok) throw new Error(r.status === 429 ? 'busy' : 'HTTP ' + r.status);
+    const ideas = parseIdeas((await r.json()).choices?.[0]?.message?.content || '');
+    if (!ideas.length) throw new Error('empty');
+    return ideas;
+  } finally { clearTimeout(timer); }
+}
+function openHelper(pre = {}) {
+  const games = helperGames();
+  let ideas = [], ctx = null, busy = false;
+  const opts = games.map((g, i) => `<option value="${i}">${esc(g.name)}</option>`).join('') + '<option value="__new">A new game</option><option value="__other">Another game…</option>';
+  openSheet(`<form class="stack" id="aiForm" novalidate>
+      <div class="grabber"></div>
+      <h2>✨ AI idea helper</h2>
+      ${pre.inspo ? `<div class="banner">Borrowing ideas from <b>${esc(pre.inspo.name)}</b></div>` : ''}
+      <div class="field"><label for="h_game">Which game?</label><select id="h_game">${opts}</select></div>
+      <div class="field" id="h_otherBox" hidden><label for="h_other">Game name</label><input id="h_other" maxlength="80" placeholder="My Roblox game"></div>
+      <div class="field"><label for="h_about" id="h_aboutLabel">What’s it about?</label><textarea id="h_about" maxlength="600"></textarea></div>
+      <div class="field" id="h_focusBox"><label for="h_focus">What do you need?</label><select id="h_focus">${AI_FOCUS.map(f => `<option>${f}</option>`).join('')}</select></div>
+      <p class="fine">Uses Pollinations, a free AI. Don’t type anything private.</p>
+      <div class="actions"><div class="right"><button type="button" class="btn" data-close>Close</button><button type="submit" class="btn primary" id="h_go">Get ideas</button></div></div>
+      <div class="ideas-out" id="h_out" aria-live="polite"></div>
+    </form>`, sheet => {
+    const form = sheet.querySelector('#aiForm'), sel = form.querySelector('#h_game'), about = form.querySelector('#h_about'), out = form.querySelector('#h_out'), go = form.querySelector('#h_go');
+    sel.value = pre.newGame || !games.length ? '__new' : '0';
+    const sync = () => {
+      const v = sel.value, g = games[+v], fresh = v === '__new';
+      form.querySelector('#h_otherBox').hidden = v !== '__other';
+      form.querySelector('#h_focusBox').hidden = fresh;
+      form.querySelector('#h_aboutLabel').textContent = fresh ? 'What kind of games do you like? (optional)' : 'What’s it about?';
+      about.placeholder = fresh ? 'Horror, pets, racing, games to play with friends…' : 'Chess pieces fight each other with weapons on a giant board…';
+      about.value = g ? excerpt(g.about, 600) : '';
+    };
+    sel.onchange = sync;
+    sync();
+    const list = () => `<div class="sec"><h3>${ctx.newGame ? 'Ideas for a new game' : `Ideas for ${esc(ctx.name)}`}</h3></div>
+      <div class="list">${ideas.map((x, k) => `<div class="row"><div class="body">
+        <div class="t">${esc(x.title)}</div>${x.detail ? `<div class="pitch">${esc(x.detail)}</div>` : ''}
+        <div class="meta">${ctx.newGame ? '' : `<button type="button" class="mini" data-task="${k}" ${x.task ? 'disabled' : ''}>${x.task ? 'Task added ✓' : '+ Task'}</button>`}<button type="button" class="mini" data-idea="${k}" ${x.idea ? 'disabled' : ''}>${x.idea ? 'Idea saved ✓' : '+ Idea'}</button></div>
+      </div></div>`).join('')}</div>
+      <p class="fine">AI can get things wrong. Keep what fits your game.</p>
+      <button type="button" class="btn more" id="h_more">More ideas</button>`;
+    async function run(more) {
+      if (busy) return;
+      if (!more) {
+        const v = sel.value, g = games[+v], name = v === '__other' ? form.querySelector('#h_other').value.trim() : g ? g.name : '';
+        if (v === '__other' && !name) { form.querySelector('#h_other').focus(); toast('Add your game’s name first.'); return; }
+        ctx = { newGame: v === '__new', name, genre: g?.genre || '', about: about.value.trim().slice(0, 600), focus: form.querySelector('#h_focus').value, inspo: pre.inspo || null };
+        ideas = [];
+      }
+      busy = true; go.disabled = true;
+      out.innerHTML = (more ? list() : '') + '<div class="thinking"><i></i><i></i><i></i>Thinking of ideas…</div>';
+      (more ? out.querySelector('.thinking') : out).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const slow = setTimeout(() => { const t = out.querySelector('.thinking'); if (t) t.lastChild.textContent = 'Still thinking… the free AI can take up to 30 seconds.'; }, 8000);
+      try {
+        const got = await askAI(ctx, ideas.map(x => x.title));
+        if (!form.isConnected) return;
+        ideas = ideas.concat(got);
+        out.innerHTML = list();
+      } catch (e) {
+        if (!form.isConnected) return;
+        out.innerHTML = (ideas.length ? list() : '') + `<div class="banner">${e.message === 'busy' ? 'The free AI is busy right now. Try again in a few seconds.' : 'Couldn’t reach the AI. Check your connection and try again.'}</div>`;
+      } finally { clearTimeout(slow); busy = false; go.disabled = false; }
+    }
+    form.onsubmit = e => { e.preventDefault(); run(false); };
+    out.onclick = e => {
+      if (e.target.closest('#h_more')) { run(true); return; }
+      const b = e.target.closest('[data-task],[data-idea]');
+      const x = b && ideas[+(b.dataset.task ?? b.dataset.idea)];
+      if (!x) return;
+      const now = Date.now();
+      if (b.dataset.task != null) { saveItem({ kind: 'task', title: x.title, game: ctx.name, priority: 'Normal', done: false, notes: x.detail, createdAt: now, updatedAt: now }); x.task = true; toast('Added to your tasks'); }
+      else { saveItem({ kind: 'idea', title: x.title, genre: ctx.genre, stage: 'Spark', notes: x.detail, createdAt: now, updatedAt: now }); x.idea = true; toast('Saved to your ideas'); }
+      b.disabled = true; b.textContent = b.dataset.task != null ? 'Task added ✓' : 'Idea saved ✓';
+    };
+  }, 'helper');
 }
 
 /* ---------- Roblox account and communities ---------- */
@@ -1090,7 +1386,7 @@ $('#tabs').addEventListener('click', e => {
   const b = e.target.closest('[data-tab]'); if (!b) return;
   state.tab = b.dataset.tab;
   try { history.replaceState(null, '', '#' + state.tab); } catch {}
-  window.scrollTo(0, 0);
+  $('#scroller').scrollTop = 0;
   render();
   if (state.tab === 'games') refreshPlayer(false);
 });
@@ -1107,6 +1403,32 @@ $('#main').addEventListener('click', e => {
   if (act === 'communities') { openCommunities(); return; }
   if (act === 'refresh') { refreshPlayer(true); return; }
   if (act === 'trending') { loadTrending(); return; }
+  if (act === 'ai') { openHelper(); return; }
+  if (act === 'ai-new') { openHelper({ newGame: true }); return; }
+  if (act === 'search') { runSearch(state.search.q); return; }
+  if (act === 'more') { runSearch(state.search.q, true); return; }
+  if (act === 'shuffle') { state.bankPage++; render(); return; }
+  const genre = e.target.closest('[data-genre]');
+  if (genre) {
+    // Keep the genre row where it was scrolled to.
+    const x = $('.chips')?.scrollLeft || 0;
+    state.bankGenre = genre.dataset.genre; state.bankPage = 0;
+    render();
+    if ($('.chips')) $('.chips').scrollLeft = x;
+    return;
+  }
+  const bank = e.target.closest('[data-bank]');
+  if (bank) {
+    const b = IDEA_BANK[+bank.dataset.bank], now = Date.now();
+    if (b && !byKind('idea').some(x => sameName(x.title, b.t))) { saveItem({ kind: 'idea', title: b.t, genre: b.g, stage: 'Spark', notes: b.p, createdAt: now, updatedAt: now }); toast('Added to your ideas'); }
+    return;
+  }
+  const find = e.target.closest('[data-find]');
+  if (find) {
+    const g = state.search.results.find(x => String(x.universeId) === find.dataset.find);
+    if (g) openFound(g);
+    return;
+  }
   const tr = e.target.closest('[data-trend]');
   if (tr) {
     const g = (state.trending?.games || []).find(x => x.id === tr.dataset.trend);
@@ -1123,6 +1445,26 @@ $('#main').addEventListener('click', e => {
   const item = row && state.items.find(i => i.id === row.dataset.edit);
   if (item) openForm(item.kind, item);
 });
+let searchTimer = 0;
+$('#searchIn').addEventListener('input', e => {
+  const q = e.target.value.trim();
+  $('#searchClear').hidden = !e.target.value;
+  clearTimeout(searchTimer);
+  if (q.length < 2) { if (state.search.q) { resetSearch(); render(); } return; }
+  searchTimer = setTimeout(() => runSearch(q), 450);
+});
+$('#searchForm').addEventListener('submit', e => {
+  e.preventDefault();
+  clearTimeout(searchTimer);
+  const q = $('#searchIn').value.trim();
+  if (q.length >= 2 && (q !== state.search.q || state.search.error)) runSearch(q);
+  $('#searchIn').blur();
+});
+$('#searchClear').onclick = () => {
+  $('#searchIn').value = ''; $('#searchClear').hidden = true;
+  clearTimeout(searchTimer); resetSearch(); render();
+  $('#searchIn').focus();
+};
 $('#fab').onclick = () => { const kind = TABS.find(t => t.id === state.tab).kind; if (kind) openForm(kind); };
 $('#settingsBtn').onclick = openSettings;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
