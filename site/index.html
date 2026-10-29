@@ -308,6 +308,28 @@ label.row { cursor: pointer; align-items: center; }
 .qr { align-self: center; width: 220px; height: 220px; border-radius: 18px; background: #fff; }
 .linkbox { align-self: center; font-size: 17px; font-weight: 800; }
 
+/* Ad spaces: one featured-game card per tab, plus side columns on wide screens. */
+.ad { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--r); border: 1px solid var(--line); cursor: pointer; color: var(--fg); min-width: 0;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--glow2) 18%, var(--surface)), var(--surface) 65%); }
+.ad:active { transform: scale(.985); }
+.ad .ad-art { width: 64px; height: 64px; border-radius: 14px; flex: none; object-fit: cover; background: var(--raised); }
+.ad .ad-art.ph { font-size: 24px; }
+.ad .ad-ask { display: grid; place-items: center; font-size: 32px; background: radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--glow1) 85%, transparent), transparent 70%), radial-gradient(circle at 75% 80%, color-mix(in srgb, var(--glow2) 80%, transparent), transparent 70%), var(--raised); }
+.ad.tall .ad-ask { font-size: 72px; }
+.ad .txt { gap: 2px; }
+.ad .txt b { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ad .tag { font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--glow-text); }
+.ad .play { flex: none; padding: 9px 16px; font-size: 14px; }
+.ad.tall { flex-direction: column; align-items: stretch; gap: 10px; }
+.ad.tall .ad-art { width: 100%; height: auto; aspect-ratio: 1; }
+.ad.in { animation: ad-in .35s ease-out; }
+@keyframes ad-in { from { transform: translateY(6px) scale(.98); } }
+@media (prefers-reduced-motion: reduce) { .ad.in { animation: none; } }
+.rail { display: none; position: fixed; top: 50%; transform: translateY(-50%); width: 180px; flex-direction: column; gap: 12px; z-index: 5; }
+.rail-h { font-size: 12px; font-weight: 800; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; padding-left: 4px; }
+@media (min-width: 1160px) { .rail:not(:empty) { display: flex; } #railL { left: calc(50% - 540px); } #railR { right: calc(50% - 540px); } }
+@media (max-height: 760px) { .rail .ad + .ad { display: none; } }
+
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 96px); background: var(--raised); color: var(--fg); padding: 10px 18px; border-radius: 999px; font-size: 14px; font-weight: 700; z-index: 30; max-width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0, 0, 0, .6); }
 </style>
 </head>
@@ -333,6 +355,8 @@ label.row { cursor: pointer; align-items: center; }
   <main id="main"></main>
 </div>
 </div>
+<aside class="rail" id="railL" aria-label="Featured games"></aside>
+<aside class="rail" id="railR" aria-label="Featured games"></aside>
 <div class="dock">
   <nav class="tabs" id="tabs" role="tablist" aria-label="Sections"></nav>
   <button class="fab" id="fab" aria-label="Add"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
@@ -611,6 +635,7 @@ async function loadTrending() {
     state.trendingError = false;
   } catch { state.trendingError = !state.trending; }
   render();
+  paintAds();
   rollNews();
 }
 
@@ -751,7 +776,7 @@ function dailyCard() {
 
 function renderIdeas() {
   const list = byKind('idea').sort((a, b) => (b.hot ? 1 : 0) - (a.hot ? 1 : 0) || (b.createdAt || 0) - (a.createdAt || 0));
-  if (!list.length) return dailyCard() + empty('No ideas yet', 'Tap + to write one down, or add one of these.') + renderBank();
+  if (!list.length) return dailyCard() + empty('No ideas yet', 'Tap + to write one down, or add one of these.') + adCard(AD_SLOT.ideas) + renderBank();
   return dailyCard() + `<div class="list">${list.map(i => `
     <div class="row" data-edit="${i.id}">
       <div class="body">
@@ -763,7 +788,7 @@ function renderIdeas() {
         </div>
         ${i.notes ? `<div class="notes">${esc(i.notes)}</div>` : ''}
       </div>
-    </div>`).join('')}</div>` + renderBank();
+    </div>`).join('')}</div>` + adCard(AD_SLOT.ideas) + renderBank();
 }
 
 function taskRow(t) {
@@ -788,7 +813,7 @@ const aiCard = () => `<div class="cta ai">
 const checklistBtn = '<button class="mini" data-act="checklists">📋 Add a checklist</button>';
 function renderTasks() {
   const everything = byKind('task');
-  if (!everything.length) return aiCard() + `<div class="bank-h"><div class="group-h">To do</div>${checklistBtn}</div>` + empty('Nothing to do yet', 'Tap + to add a task, or add a ready-made checklist.');
+  if (!everything.length) return aiCard() + `<div class="bank-h"><div class="group-h">To do</div>${checklistBtn}</div>` + empty('Nothing to do yet', 'Tap + to add a task, or add a ready-made checklist.') + adCard(AD_SLOT.tasks);
   // One chip per game the tasks are filed under ('' = tasks without a game).
   const games = [];
   everything.forEach(t => { const g = t.game || ''; const hit = games.find(x => sameName(x.name, g)); if (hit) hit.n++; else games.push({ name: g, n: 1 }); });
@@ -808,7 +833,7 @@ function renderTasks() {
   return aiCard() + chips + `
     <div class="bank-h"><div class="group-h">To do</div>${checklistBtn}</div>
     ${open.length ? `<div class="list">${open.map(taskRow).join('')}</div>` : '<div class="banner">All caught up.</div>'}
-    ${done.length ? `<div class="group-h">Done</div><div class="list">${done.map(taskRow).join('')}</div>` : ''}` + team;
+    ${done.length ? `<div class="group-h">Done</div><div class="list">${done.map(taskRow).join('')}</div>` : ''}` + adCard(AD_SLOT.tasks) + team;
 }
 
 function statusChip(s) {
@@ -879,7 +904,7 @@ function renderGames() {
       </div>
     </div>`;
     if (state.playerError) html += '<div class="banner">Couldn’t refresh from Roblox just now, so these numbers may be a little old.</div>';
-    html += toolsRow();
+    html += toolsRow() + adCard(AD_SLOT.games);
     html += statTiles([['Ad credits spent', fmt(sum('adCredits'))], ['Robux earned', fmt(sum('robux'))]]);
     const onProfile = linked.filter(g => g.source !== 'community');
     const comms = (p.communities || []).filter(c => c.id);
@@ -897,7 +922,7 @@ function renderGames() {
     return html;
   }
   const sum = k => manual.reduce((acc, g) => acc + num(g[k]), 0);
-  html += toolsRow();
+  html += toolsRow() + adCard(AD_SLOT.games);
   html += statTiles([['Total visits', fmt(sum('visits'))], ['Best peak CCU', fmt(Math.max(0, ...manual.map(g => num(g.peakCcu))))], ['Ad credits spent', fmt(sum('adCredits'))], ['Robux earned', fmt(sum('robux'))]]);
   html += manual.length ? manualRows(manual) : empty('No games logged yet', 'Tap + to add a game you’ve made, with its CCU, visits and ad spend.');
   return html;
@@ -922,7 +947,7 @@ function renderTrending() {
   if (state.search.q) return renderFound();
   const s = state.trending;
   if (!s) return state.trendingError ? cta('Couldn’t load trending games', 'Check your connection and try again.', 'Retry', 'trending') : '<div class="banner">Loading what’s trending…</div>';
-  return ['Most played', 'Rising fast'].map(name => {
+  const [played, rising] = ['Most played', 'Rising fast'].map(name => {
     const list = (s.games || []).filter(g => g.list === name).sort((a, b) => a.rank - b.rank);
     if (!list.length) return '';
     return `<div class="group-h">${name}</div>
@@ -932,7 +957,8 @@ function renderTrending() {
           <div class="tname">${esc(g.name)}</div>
           <div class="tmeta"><span>${fmt(g.ccu)} playing</span>${changeChip(g)}</div>
         </button>`).join('')}</div>`;
-  }).join('');
+  });
+  return played + adCard(AD_SLOT.trending) + rising;
 }
 
 function render() {
@@ -1557,6 +1583,68 @@ function goTab(tab) {
   if (tab === 'games') refreshPlayer(false);
 }
 
+/* ---------- ad spaces ---------- */
+// Featured-game slots. Games listed in data/ads.json rotate through them, marked Sponsored (or their own
+// tag); a "Want your game here?" card asks other developers to get in touch. The slots rotate every few seconds.
+let sponsored = [], adTick = 0;
+const AD_SLOT = { ideas: 0, tasks: 1, games: 2, trending: 3 };
+const AD_CONTACT = { handle: '@helmuts_world', url: 'https://www.tiktok.com/@helmuts_world' };
+async function loadAds() {
+  try {
+    const r = await fetch('data/ads.json?t=' + Math.floor(Date.now() / 60000), { cache: 'no-store' });
+    if (!r.ok) return;
+    const list = ((await r.json()).games || []).map(x => typeof x === 'string' ? { url: x } : x).filter(x => x && /\/games\/\d+/.test(x.url || '')).slice(0, 10);
+    const places = list.map(x => +x.url.match(/\/games\/(\d+)/)[1]);
+    const unis = await Promise.all(places.map(p => getJSON(`${RP.apis}/universes/v1/places/${p}/universe`).then(d => d.universeId || null, () => null)));
+    const ids = unis.filter(Boolean);
+    if (!ids.length) return;
+    const [details, icons] = await Promise.all([gameDetails(ids), thumbsOf(`${RP.thumbs}/v1/games/icons?returnPolicy=PlaceHolder&size=256x256&format=Webp&isCircular=false&universeIds=`, ids).catch(() => ({}))]);
+    sponsored = list.map((x, i) => {
+      const d = details[unis[i]];
+      return d ? { key: 'sp' + unis[i], name: d.sourceName || d.name, icon: icons[unis[i]] || '', url: `https://www.roblox.com/games/${places[i]}`,
+        line: x.text || `${fmt(d.playing || 0)} playing`, tag: x.tag || 'Sponsored', universeId: unis[i], placeId: places[i], sponsored: !x.tag } : null;
+    }).filter(Boolean);
+    render(); paintAds();
+  } catch {}
+}
+const adContact = { key: 'contact', contact: true, name: 'Want your game here?', line: `Send me a request on TikTok ${AD_CONTACT.handle}`, tag: 'Ad space', url: AD_CONTACT.url };
+const adPool = () => [...sponsored, adContact];
+function adCard(slot, tall) {
+  const pool = adPool(), g = pool[(slot + adTick) % pool.length];
+  const art = g.contact ? '<div class="ad-art ad-ask" aria-hidden="true">📣</div>'
+    : g.icon ? `<img class="ad-art" src="${esc(g.icon)}" alt="" referrerpolicy="no-referrer">` : `<div class="ad-art ph" aria-hidden="true">${esc(g.name.charAt(0))}</div>`;
+  const button = g.contact ? `<a class="btn primary play" href="${esc(g.url)}" target="_blank" rel="noopener">TikTok ↗</a>`
+    : `<a class="btn primary play" href="${esc(g.url)}" target="_blank" rel="noopener${g.sponsored ? ' sponsored' : ''}">▶ Play</a>`;
+  return `<div class="ad${tall ? ' tall' : ''}" data-ad="${esc(g.key)}" data-slot="${slot}" role="link" tabindex="0" aria-label="${esc(g.contact ? `${g.name} ${g.line}` : `${g.tag}: ${g.name}`)}">
+      ${art}
+      <div class="txt"><span class="tag">${esc(g.tag)}</span><b>${esc(g.name)}</b><span>${esc(g.line)}</span></div>
+      ${button}
+    </div>`;
+}
+// Fills the side columns, and redraws the slot on the current tab in place (no full re-render).
+function paintAds(rotated) {
+  // With only the "your game here" card there's nothing to rotate, so each column shows it once.
+  const rail = (a, b) => '<div class="rail-h">Featured</div>' + adCard(a, true) + (sponsored.length ? adCard(b, true) : '');
+  const before = new Set([...document.querySelectorAll('.rail .ad')].map(el => el.dataset.slot + el.dataset.ad));
+  $('#railL').innerHTML = rail(4, 5);
+  $('#railR').innerHTML = rail(6, 7);
+  document.querySelectorAll('#main .ad[data-slot]').forEach(el => {
+    const box = document.createElement('div');
+    box.innerHTML = adCard(+el.dataset.slot, el.classList.contains('tall'));
+    const next = box.firstElementChild;
+    if (next.dataset.ad === el.dataset.ad) return;
+    if (rotated) next.classList.add('in');
+    el.replaceWith(next);
+  });
+  if (rotated) document.querySelectorAll('.rail .ad').forEach(el => { if (!before.has(el.dataset.slot + el.dataset.ad)) el.classList.add('in'); });
+}
+function openAd(key) {
+  const g = adPool().find(x => x.key === key);
+  if (!g) return;
+  if (g.contact) window.open(g.url, '_blank', 'noopener');
+  else if (g.universeId) openFound({ universeId: g.universeId, placeId: g.placeId, name: g.name, ccu: 0, likeRatio: null, icon: g.icon });
+}
+
 /* ---------- Roblox account and communities ---------- */
 function connect(raw) {
   const name = String(raw || '').trim().replace(/^@/, '');
@@ -1820,6 +1908,8 @@ $('#main').addEventListener('click', e => {
     if (t) saveItem({ ...t, done: tog.checked, updatedAt: Date.now() });
     return;
   }
+  const ad = e.target.closest('[data-ad]');
+  if (ad && !e.target.closest('a')) { openAd(ad.dataset.ad); return; }
   const act = e.target.closest('[data-act]')?.dataset.act;
   if (act === 'account') { openAccount(); return; }
   if (act === 'communities') { openCommunities(); return; }
@@ -1907,7 +1997,14 @@ $('#fab').onclick = () => {
 };
 $('#settingsBtn').onclick = openSettings;
 $('#newsBtn').onclick = openNews;
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
+['#railL', '#railR'].forEach(s => $(s).addEventListener('click', e => {
+  const ad = e.target.closest('[data-ad]');
+  if (ad && !e.target.closest('a')) openAd(ad.dataset.ad);
+}));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSheet();
+  if (e.key === 'Enter' && e.target.matches?.('.ad[data-ad]')) openAd(e.target.dataset.ad);
+});
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { bumpStreak(); loadTrending(); refreshPlayer(false); } });
 
 /* ---------- start ---------- */
@@ -1926,8 +2023,11 @@ window.addEventListener('hashchange', () => {
   if (location.hash.startsWith('#team=')) takeTeam();
 });
 loadTrending();
+loadAds();
 refreshPlayer(false);
 setInterval(() => { loadTrending(); refreshPlayer(false); }, 15 * 60 * 1000);
+// Rotate the ad spaces, but not while something is open on top or the page is hidden.
+setInterval(() => { if (!document.hidden && !sheetName && !state.welcomeOpen) { adTick++; paintAds(true); } }, 8000);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 </script>
 </body>
